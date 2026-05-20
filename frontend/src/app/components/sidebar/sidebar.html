@@ -1,19 +1,19 @@
-<aside class="w-64 bg-emerald-700 text-white h-full min-h-screen shadow-lg flex flex-col">
+<aside class="w-64 bg-primary-700 text-white h-full min-h-screen shadow-lg flex flex-col">
 
   <!-- Header -->
-  <div class="p-6 border-b border-emerald-600">
+  <div class="p-6 border-b border-primary-600">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3">
         <span class="text-3xl">🥦</span>
         <div>
           <h1 class="text-xl font-bold">CalorieTrack</h1>
-          <p class="text-xs text-emerald-200">Nutrición diaria</p>
+          <p class="text-xs text-primary-200">Nutrición diaria</p>
         </div>
       </div>
       <!-- Botón cerrar (solo mobile) -->
       <button
         (click)="close()"
-        class="md:hidden p-1.5 rounded-lg hover:bg-emerald-600 transition-colors"
+        class="md:hidden p-1.5 rounded-lg hover:bg-primary-600 transition-colors"
         aria-label="Cerrar menú"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -27,10 +27,10 @@
   <nav class="flex-1 px-4 py-6 space-y-2">
     <a
       routerLink="/dashboard"
-      routerLinkActive="bg-emerald-600"
+      routerLinkActive="bg-primary-600"
       [routerLinkActiveOptions]="{ exact: true }"
       (click)="close()"
-      class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-emerald-600 transition font-medium"
+      class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary-600 transition font-medium"
     >
       <span>📊</span>
       Dashboard
@@ -38,9 +38,9 @@
 
     <a
       routerLink="/meals/add"
-      routerLinkActive="bg-emerald-600"
+      routerLinkActive="bg-primary-600"
       (click)="close()"
-      class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-emerald-600 transition font-medium"
+      class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary-600 transition font-medium"
     >
       <span>➕</span>
       Agregar Comida
@@ -48,9 +48,9 @@
 
     <a
       routerLink="/meals/history"
-      routerLinkActive="bg-emerald-600"
+      routerLinkActive="bg-primary-600"
       (click)="close()"
-      class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-emerald-600 transition font-medium"
+      class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary-600 transition font-medium"
     >
       <span>📋</span>
       Historial
@@ -58,9 +58,9 @@
 
     <a
       routerLink="/settings"
-      routerLinkActive="bg-emerald-600"
+      routerLinkActive="bg-primary-600"
       (click)="close()"
-      class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-emerald-600 transition font-medium"
+      class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary-600 transition font-medium"
     >
       <span>⚙️</span>
       Configuración
@@ -68,7 +68,7 @@
   </nav>
 
   <!-- Logout -->
-  <div class="p-4 border-t border-emerald-600">
+  <div class="p-4 border-t border-primary-600">
     <button
       (click)="logout()"
       class="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-red-600 hover:bg-red-700 transition font-semibold"

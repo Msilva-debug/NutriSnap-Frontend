@@ -1,9 +1,9 @@
-<div class="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center p-4">
+<div class="min-h-screen bg-gradient-to-br from-primary-50 to-accent-100 flex items-center justify-center p-4">
   <div class="w-full max-w-lg">
 
     <!-- Logo / Título -->
     <div class="text-center mb-8">
-      <div class="inline-flex items-center justify-center w-16 h-16 bg-emerald-500 rounded-2xl mb-4 shadow-lg">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-2xl mb-4 shadow-lg">
         <span class="text-3xl">🥦</span>
       </div>
       <h1 class="text-3xl font-bold text-gray-800">CalorieTrack</h1>
@@ -14,14 +14,14 @@
     <div class="flex items-center justify-center gap-3 mb-6">
       <div class="flex items-center gap-2">
         <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-          [class]="step() >= 1 ? 'bg-emerald-500 text-white' : 'bg-gray-200 text-gray-500'">1</div>
-        <span class="text-sm font-medium" [class]="step() >= 1 ? 'text-emerald-600' : 'text-gray-400'">Cuenta</span>
+          [class]="step() >= 1 ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-500'">1</div>
+        <span class="text-sm font-medium" [class]="step() >= 1 ? 'text-primary-600' : 'text-gray-400'">Cuenta</span>
       </div>
-      <div class="w-10 h-0.5" [class]="step() >= 2 ? 'bg-emerald-400' : 'bg-gray-200'"></div>
+      <div class="w-10 h-0.5" [class]="step() >= 2 ? 'bg-primary-400' : 'bg-gray-200'"></div>
       <div class="flex items-center gap-2">
         <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-          [class]="step() >= 2 ? 'bg-emerald-500 text-white' : 'bg-gray-200 text-gray-500'">2</div>
-        <span class="text-sm font-medium" [class]="step() >= 2 ? 'text-emerald-600' : 'text-gray-400'">Perfil físico</span>
+          [class]="step() >= 2 ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-500'">2</div>
+        <span class="text-sm font-medium" [class]="step() >= 2 ? 'text-primary-600' : 'text-gray-400'">Perfil físico</span>
       </div>
     </div>
 
@@ -37,7 +37,7 @@
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-600 mb-1">Correo electrónico</label>
             <input type="email" formControlName="email" placeholder="tu@correo.com"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400 transition"
               [class.border-red-400]="email.invalid && email.touched" />
             @if (email.invalid && email.touched) {
               <p class="text-red-500 text-xs mt-1">
@@ -50,7 +50,7 @@
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-600 mb-1">Contraseña</label>
             <input type="password" formControlName="password" placeholder="Mínimo 6 caracteres"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400 transition"
               [class.border-red-400]="password.invalid && password.touched" />
             @if (password.invalid && password.touched) {
               <p class="text-red-500 text-xs mt-1">Mínimo 6 caracteres.</p>
@@ -60,7 +60,7 @@
           <div class="mb-6">
             <label class="block text-sm font-medium text-gray-600 mb-1">Confirmar contraseña</label>
             <input type="password" formControlName="confirmPassword" placeholder="Repite tu contraseña"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400 transition"
               [class.border-red-400]="confirmPassword.invalid && confirmPassword.touched" />
           </div>
 
@@ -69,7 +69,7 @@
           }
 
           <button type="button" (click)="goToStep2()"
-            class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl transition shadow-md cursor-pointer">
+            class="w-full py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition shadow-md cursor-pointer">
             Siguiente →
           </button>
         }
@@ -82,7 +82,7 @@
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-600 mb-1">Nombre completo</label>
             <input type="text" formControlName="name" placeholder="Tu nombre"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400 transition\"
               [class.border-red-400]="name.invalid && name.touched" />
             @if (name.invalid && name.touched) {
               <p class="text-red-500 text-xs mt-1">El nombre es obligatorio.</p>
@@ -93,13 +93,13 @@
             <div>
               <label class="block text-sm font-medium text-gray-600 mb-1">Fecha de nacimiento</label>
               <input type="date" formControlName="birthdate"
-                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400 transition\"
                 [class.border-red-400]="birthdate.invalid && birthdate.touched" />
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-600 mb-1">Edad (años)</label>
               <input type="number" formControlName="age" placeholder="25" min="1" max="120"
-                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400 transition\"
                 [class.border-red-400]="age.invalid && age.touched" />
             </div>
           </div>
@@ -108,13 +108,13 @@
             <div>
               <label class="block text-sm font-medium text-gray-600 mb-1">Peso (kg)</label>
               <input type="number" formControlName="weight" placeholder="70" min="20" max="300"
-                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400 transition\"
                 [class.border-red-400]="weight.invalid && weight.touched" />
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-600 mb-1">Altura (cm)</label>
               <input type="number" formControlName="height" placeholder="170" min="50" max="250"
-                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400 transition\"
                 [class.border-red-400]="height.invalid && height.touched" />
             </div>
           </div>
@@ -123,13 +123,13 @@
             <label class="block text-sm font-medium text-gray-600 mb-1">Sexo</label>
             <div class="grid grid-cols-2 gap-3">
               <label class="flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition"
-                [class]="sex.value === 'male' ? 'border-emerald-400 bg-emerald-50' : 'border-gray-200 hover:border-emerald-200'">
-                <input type="radio" formControlName="sex" value="male" class="accent-emerald-500" />
+                [class]="sex.value === 'male' ? 'border-primary-400 bg-primary-50' : 'border-gray-200 hover:border-primary-200'">
+                <input type="radio" formControlName="sex" value="male" class="accent-primary-500" />
                 <span class="text-sm font-medium text-gray-700">Masculino</span>
               </label>
               <label class="flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition"
-                [class]="sex.value === 'female' ? 'border-emerald-400 bg-emerald-50' : 'border-gray-200 hover:border-emerald-200'">
-                <input type="radio" formControlName="sex" value="female" class="accent-emerald-500" />
+                [class]="sex.value === 'female' ? 'border-primary-400 bg-primary-50' : 'border-gray-200 hover:border-primary-200'">
+                <input type="radio" formControlName="sex" value="female" class="accent-primary-500" />
                 <span class="text-sm font-medium text-gray-700">Femenino</span>
               </label>
             </div>
@@ -141,7 +141,7 @@
           <div class="mb-6">
             <label class="block text-sm font-medium text-gray-600 mb-1">Nivel de actividad física</label>
             <select formControlName="activityLevel"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition bg-white"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400 transition bg-white"
               [class.border-red-400]="activityLevel.invalid && activityLevel.touched">
               <option value="" disabled>Selecciona una opción</option>
               <option value="sedentary">Sedentario (poco o nada de ejercicio)</option>
@@ -165,7 +165,7 @@
               ← Atrás
             </button>
             <button type="submit" [disabled]="loading()"
-              class="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 text-white font-semibold rounded-xl transition shadow-md cursor-pointer">
+              class="flex-1 py-3 bg-primary-500 hover:bg-primary-600 disabled:opacity-60 text-white font-semibold rounded-xl transition shadow-md cursor-pointer">
               @if (loading()) {
                 <span class="inline-flex items-center justify-center gap-2">
                   <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
@@ -186,7 +186,7 @@
       <!-- Link a login -->
       <p class="text-center text-sm text-gray-500 mt-6">
         ¿Ya tienes cuenta?
-        <a routerLink="/login" class="text-emerald-600 font-semibold hover:underline">
+        <a routerLink="/login" class="text-primary-600 font-semibold hover:underline">
           Inicia sesión
         </a>
       </p>

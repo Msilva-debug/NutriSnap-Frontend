@@ -16,7 +16,7 @@
       @if (!imagePreview()) {
         <label
           for="imageInput"
-          class="flex flex-col items-center justify-center w-full h-52 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-green-400 hover:bg-green-50 transition-colors"
+          class="flex flex-col items-center justify-center w-full h-52 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-accent-400 hover:bg-accent-50 transition-colors"
         >
           <svg class="w-10 h-10 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -56,7 +56,7 @@
             type="button"
             (click)="mealType.set($any(option.value))"
             [class]="mealType() === option.value
-              ? 'flex flex-col items-center gap-1 p-3 rounded-xl border-2 border-green-500 bg-green-50 text-green-700'
+              ? 'flex flex-col items-center gap-1 p-3 rounded-xl border-2 border-primary-500 bg-primary-50 text-primary-700'
               : 'flex flex-col items-center gap-1 p-3 rounded-xl border-2 border-gray-200 text-gray-500 hover:border-gray-300 transition-colors'"
           >
             <span class="text-xl">{{ option.icon }}</span>
@@ -81,7 +81,7 @@
     <button
       (click)="analyzeImage()"
       [disabled]="!selectedImage() || isAnalyzing()"
-      class="w-full py-3.5 rounded-xl font-semibold text-white transition-all bg-green-500 hover:bg-green-600 active:scale-95 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:scale-100"
+      class="w-full py-3.5 rounded-xl font-semibold text-white transition-all bg-primary-500 hover:bg-primary-600 active:scale-95 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:scale-100"
     >
       @if (isAnalyzing()) {
         <span class="flex items-center justify-center gap-2">
@@ -126,9 +126,9 @@
       <div class="px-6 py-5 space-y-5">
 
         <!-- Calorías -->
-        <div class="flex items-center justify-center bg-green-50 rounded-xl py-4">
-          <span class="text-5xl font-bold text-green-600">{{ result.calories }}</span>
-          <span class="text-lg text-green-500 ml-2 mt-2">kcal</span>
+        <div class="flex items-center justify-center bg-primary-50 rounded-xl py-4">
+          <span class="text-5xl font-bold text-primary-600">{{ result.calories }}</span>
+          <span class="text-lg text-primary-500 ml-2 mt-2">kcal</span>
         </div>
 
         <!-- Macros -->
@@ -187,7 +187,7 @@
         </button>
         <button
           (click)="saveMeal()"
-          class="flex-1 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-white font-semibold active:scale-95 transition-all text-sm"
+          class="flex-1 py-3 rounded-xl bg-primary-500 hover:bg-primary-600 text-white font-semibold active:scale-95 transition-all text-sm"
         >
           Guardar comida
         </button>
