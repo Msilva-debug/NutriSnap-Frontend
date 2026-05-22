@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NutritionAnalysisService } from '../../services/nutrition-analysis.service';
+import { NutritionAnalysisService } from './services/nutrition-analysis.service';
 import { FoodAnalysisResult, Meal } from '../../models/meal.model';
 
 @Component({
