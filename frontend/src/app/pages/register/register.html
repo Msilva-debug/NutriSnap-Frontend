@@ -232,7 +232,7 @@
             >
               <option value="" disabled>Selecciona una opción</option>
               @for (item of activityLevels; track $index) {
-                <option [value]="item.value">{{ item.value }}</option>
+                <option [value]="item.value">{{ item.description }}</option>
               }
             </select>
             @if (activityLevel.invalid && activityLevel.touched) {

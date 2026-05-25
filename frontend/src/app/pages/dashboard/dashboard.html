@@ -3,7 +3,7 @@
 
     <!-- Encabezado -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-800">📊 Dashboard de Calorías</h1>
+      <h1 class="text-3xl font-bold text-gray-800">📊 Panel de calorías</h1>
       <p class="text-gray-500 mt-1 capitalize">{{ todayDate() }}</p>
     </div>
 
@@ -11,7 +11,7 @@
     <div class="mb-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Tarjeta principal de calorías -->
       <div class="lg:col-span-2 bg-gradient-to-br from-primary-500 to-accent-600 rounded-2xl shadow-lg p-8 text-white">
-        <h2 class="text-lg font-semibold mb-4">Consumo de Hoy</h2>
+        <h2 class="text-lg font-semibold mb-4">Consumo de hoy</h2>
 
         <div class="mb-6">
           <div class="flex items-end justify-between mb-3">
@@ -87,7 +87,7 @@
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <span>🍿</span>
-              <span class="text-sm text-gray-600">Snack</span>
+              <span class="text-sm text-gray-600">Merienda</span>
             </div>
             <span class="font-semibold text-gray-800">
               {{ mealsByType['snack'].reduce((s, m) => s + m.calories, 0) }} kcal
@@ -100,12 +100,12 @@
     <!-- Listado de comidas -->
     <div class="bg-white rounded-xl shadow-md p-6">
       <div class="flex items-center justify-between mb-6">
-        <h3 class="text-lg font-semibold text-gray-800">🍴 Comidas Registradas</h3>
+        <h3 class="text-lg font-semibold text-gray-800">🍴 Comidas registradas</h3>
         <a
           routerLink="/meals/add"
           class="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2 px-4 rounded-lg transition cursor-pointer"
         >
-          + Agregar Comida
+          + Agregar comida
         </a>
       </div>
 

@@ -1,7 +1,13 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { ActivityLevel, NutritionAnalysisService } from '../add-meal/services/nutrition-analysis.service';
+import { finalize } from 'rxjs';
+import {
+  ActivityLevel,
+  NutritionAnalysisService,
+} from '../add-meal/services/nutrition-analysis.service';
+import { CreateUserRequest, UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-register',
@@ -15,6 +21,7 @@ export class Register implements OnInit {
   loading = signal(false);
   errorMsg = signal('');
   step = signal<1 | 2>(1);
+  private readonly userService = inject(UserService);
   nutritionService = inject(NutritionAnalysisService);
 
   constructor(
@@ -22,14 +29,14 @@ export class Register implements OnInit {
     private router: Router,
   ) {
     this.form = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', Validators.required],
-      name: ['', Validators.required],
-      birthdate: ['', Validators.required],
-      age: [null, [Validators.required, Validators.min(1), Validators.max(120)]],
-      weight: [null, [Validators.required, Validators.min(20), Validators.max(300)]],
-      height: [null, [Validators.required, Validators.min(50), Validators.max(250)]],
+      email: ['mateocelis1550@gmail.com', [Validators.required, Validators.email]],
+      password: ['Mateosilva01', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['Mateosilva01', Validators.required],
+      name: ['Mateo', Validators.required],
+      birthdate: ['01/06/2004', Validators.required],
+      age: ['24', [Validators.required, Validators.min(1), Validators.max(120)]],
+      weight: [70, [Validators.required, Validators.min(20), Validators.max(300)]],
+      height: ['1.70', [Validators.required, Validators.min(50), Validators.max(250)]],
       sex: ['', Validators.required],
       activityLevel: ['', Validators.required],
     });
@@ -57,13 +64,65 @@ export class Register implements OnInit {
   }
 
   onSubmit() {
-    if (this.form.invalid) return;
-    this.loading.set(true);
     this.errorMsg.set('');
-    setTimeout(() => {
-      this.loading.set(false);
-      this.router.navigate(['/login']);
-    }, 1500);
+
+    if (!this.canSubmit()) return;
+
+    this.loading.set(true);
+
+    this.userService
+      .createUser(this.buildCreateUserRequest())
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: () => this.router.navigate(['/login']),
+        error: (error: HttpErrorResponse) => {
+          this.errorMsg.set(this.getRegisterErrorMessage(error));
+        },
+      });
+  }
+
+  private canSubmit(): boolean {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return false;
+    }
+
+    if (this.password.value !== this.confirmPassword.value) {
+      this.errorMsg.set('Las contraseñas no coinciden.');
+      this.step.set(1);
+      return false;
+    }
+
+    return true;
+  }
+
+  private buildCreateUserRequest(): CreateUserRequest {
+    const formValue = this.form.getRawValue();
+
+    return {
+      email: formValue.email,
+      name: formValue.name,
+      password: formValue.password,
+      confirmPassword: formValue.confirmPassword,
+      birthdate: formValue.birthdate,
+      age: Number(formValue.age),
+      weight: Number(formValue.weight),
+      height: Number(formValue.height),
+      sex: formValue.sex,
+      activityLevel: formValue.activityLevel,
+    };
+  }
+
+  private getRegisterErrorMessage(error: HttpErrorResponse): string {
+    const message = error.error?.message;
+
+    if (Array.isArray(message)) {
+      return message.join(' ');
+    }
+
+    return typeof message === 'string'
+      ? message
+      : 'No se pudo crear la cuenta. Intenta nuevamente.';
   }
 
   get email() {

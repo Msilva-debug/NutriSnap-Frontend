@@ -5,10 +5,11 @@ import { FoodAnalysisResult } from '../../../models/meal.model';
 import { environment } from '../../../../environments/environment';
 
 export interface ActivityLevel {
-  id?: string | number;
+  id: number;
   value: string;
+  label: string;
+  description: string;
 }
-
 @Injectable({
   providedIn: 'root',
 })
