@@ -7,11 +7,12 @@ import {
   ActivityLevel,
   NutritionAnalysisService,
 } from '../add-meal/services/nutrition-analysis.service';
+import { RabbitIcon } from '../../components/rabbit-icon/rabbit-icon';
 import { CreateUserRequest, UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, RabbitIcon],
   templateUrl: './register.html',
   styles: ``,
 })

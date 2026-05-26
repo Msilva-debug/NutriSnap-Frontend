@@ -1,10 +1,13 @@
-<div class="min-h-screen bg-gradient-to-br from-primary-50 to-accent-100 flex items-center justify-center p-4">
+<div
+  class="min-h-screen bg-gradient-to-br from-primary-50 to-accent-100 flex items-center justify-center p-4"
+>
   <div class="w-full max-w-md">
-
     <!-- Logo / Título -->
     <div class="text-center mb-8">
-      <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-2xl mb-4 shadow-lg">
-        <span class="text-3xl">🥦</span>
+      <div
+        class="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-2xl mb-4 shadow-lg"
+      >
+        <app-rabbit-icon size="md" />
       </div>
       <h1 class="text-3xl font-bold text-gray-800">CalorieTrack</h1>
       <p class="text-gray-500 mt-1">Controla tu nutrición diaria</p>
@@ -15,7 +18,6 @@
       <h2 class="text-xl font-semibold text-gray-700 mb-6">Iniciar sesión</h2>
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-
         <!-- Email -->
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-600 mb-1" for="email">
@@ -31,8 +33,11 @@
           />
           @if (email.invalid && email.touched) {
             <p class="text-red-500 text-xs mt-1">
-              @if (email.hasError('required')) { El correo es obligatorio. }
-              @else { Ingresa un correo válido. }
+              @if (email.hasError('required')) {
+                El correo es obligatorio.
+              } @else {
+                Ingresa un correo válido.
+              }
             </p>
           }
         </div>
@@ -71,8 +76,15 @@
           @if (loading()) {
             <span class="inline-flex items-center gap-2">
               <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
               </svg>
               Ingresando...
             </span>
@@ -90,6 +102,23 @@
         </a>
       </p>
     </div>
-
   </div>
 </div>
+
+@if (showSessionExpiredModal()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+      <h2 class="text-lg font-semibold text-gray-800">Sesión expirada</h2>
+      <p class="mt-2 text-sm text-gray-500">
+        Tu sesión expiró. Inicia sesión nuevamente para continuar.
+      </p>
+      <button
+        type="button"
+        (click)="this.showSessionExpiredModal.set(false)"
+        class="cursor-pointer mt-5 w-full rounded-xl bg-primary-900 px-4 py-3 font-semibold text-white transition hover:bg-primary-600"
+      >
+        Entendido
+      </button>
+    </div>
+  </div>
+}

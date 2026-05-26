@@ -29,4 +29,26 @@ export class AuthService {
       }),
     );
   }
+  getToken(): string | null {
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  hasToken(): boolean {
+    return !!this.getToken();
+  }
+
+  logout(): void {
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.userKey);
+  }
+
+  isTokenExpired(): boolean {
+    const token = this.getToken();
+    if (!token) return true;
+
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const expiresAt = payload.exp * 1000;
+
+    return Date.now() >= expiresAt;
+  }
 }

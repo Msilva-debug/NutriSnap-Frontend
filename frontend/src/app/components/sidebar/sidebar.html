@@ -1,10 +1,9 @@
 <aside class="w-64 bg-primary-700 text-white h-full min-h-screen shadow-lg flex flex-col">
-
   <!-- Header -->
   <div class="p-6 border-b border-primary-600">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <span class="text-3xl">🥦</span>
+        <app-rabbit-icon size="md" />
         <div>
           <h1 class="text-xl font-bold">CalorieTrack</h1>
           <p class="text-xs text-primary-200">Nutrición diaria</p>
@@ -17,7 +16,12 @@
         aria-label="Cerrar menú"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
     </div>
@@ -68,14 +72,13 @@
   </nav>
 
   <!-- Logout -->
-  <div class="p-4 border-t border-primary-600">
+  <div class="p-4 border-t border-primary-900">
     <button
       (click)="logout()"
-      class="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-red-600 hover:bg-red-700 transition font-semibold"
+      class="cursor-pointer w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-900 hover:bg-primary-900 transition font-semibold"
     >
       <span>🚪</span>
       Salir
     </button>
   </div>
-
 </aside>

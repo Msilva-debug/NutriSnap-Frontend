@@ -1,9 +1,10 @@
 import { Component, output } from '@angular/core';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { RabbitIcon } from '../rabbit-icon/rabbit-icon';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, RabbitIcon],
   templateUrl: './sidebar.html',
   styles: ``,
 })

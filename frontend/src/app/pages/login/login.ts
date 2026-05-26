@@ -1,27 +1,36 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
+import { RabbitIcon } from '../../components/rabbit-icon/rabbit-icon';
 import { AuthService, LoginRequest } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, RabbitIcon],
   templateUrl: './login.html',
   styles: ``,
 })
-export class Login {
+export class Login implements OnInit {
   form: FormGroup;
   loading = signal(false);
   errorMsg = signal('');
   private readonly authService = inject(AuthService);
-
-  constructor(private fb: FormBuilder, private router: Router) {
+  showSessionExpiredModal = signal(false);
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private route: ActivatedRoute,
+  ) {
     this.form = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      email: ['mateocelis1550@gmail.com', [Validators.required, Validators.email]],
+      password: ['Mateosilva01', [Validators.required, Validators.minLength(6)]],
     });
+  }
+  ngOnInit(): void {
+    const sessionExpired = this.route.snapshot.queryParamMap.get('sessionExpired') === 'true';
+    this.showSessionExpiredModal.set(sessionExpired);
   }
 
   onSubmit() {
@@ -61,11 +70,8 @@ export class Login {
       return message.join(' ');
     }
 
-    return typeof message === 'string'
-      ? message
-      : 'No se pudo iniciar sesión. Intenta nuevamente.';
+    return typeof message === 'string' ? message : 'No se pudo iniciar sesión. Intenta nuevamente.';
   }
-
   get email() {
     return this.form.get('email')!;
   }
