@@ -83,21 +83,29 @@
       [disabled]="!selectedImage() || isAnalyzing()"
       class="w-full py-3.5 rounded-xl font-semibold text-white transition-all bg-primary-500 hover:bg-primary-600 active:scale-95 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:scale-100"
     >
-      @if (isAnalyzing()) {
-        <span class="flex items-center justify-center gap-2">
-          <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-          </svg>
-          Analizando...
-        </span>
-      } @else {
-        Analizar con IA
-      }
+      Analizar con IA
     </button>
 
   </div>
 </div>
+
+<!-- Modal de carga -->
+@if (isAnalyzing()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+    <div class="w-full max-w-sm bg-white rounded-2xl shadow-xl px-6 py-7 text-center">
+      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-50">
+        <svg class="h-8 w-8 animate-spin text-primary-600" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+      </div>
+      <h2 class="text-lg font-semibold text-gray-900">Analizando comida</h2>
+      <p class="mt-2 text-sm text-gray-500">
+        Estamos calculando la información nutricional de tu imagen.
+      </p>
+    </div>
+  </div>
+}
 
 <!-- Modal de resultados -->
 @if (showModal()) {
@@ -187,11 +195,30 @@
         </button>
         <button
           (click)="saveMeal()"
-          class="flex-1 py-3 rounded-xl bg-primary-500 hover:bg-primary-600 text-white font-semibold active:scale-95 transition-all text-sm"
+          [disabled]="isSaving()"
+          class="flex-1 py-3 rounded-xl bg-primary-500 hover:bg-primary-600 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-white font-semibold active:scale-95 disabled:scale-100 transition-all text-sm"
         >
           Guardar comida
         </button>
       </div>
+    </div>
+  </div>
+}
+
+<!-- Modal de guardado -->
+@if (isSaving()) {
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+    <div class="w-full max-w-sm bg-white rounded-2xl shadow-xl px-6 py-7 text-center">
+      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-50">
+        <svg class="h-8 w-8 animate-spin text-primary-600" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+      </div>
+      <h2 class="text-lg font-semibold text-gray-900">Guardando comida</h2>
+      <p class="mt-2 text-sm text-gray-500">
+        Estamos registrando tu comida en el sistema.
+      </p>
     </div>
   </div>
 }

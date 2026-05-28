@@ -66,7 +66,9 @@ export class Dashboard {
     this.meals.update(current => [meal, ...current]);
   }
 
-  deleteMeal(mealId: string) {
+  deleteMeal(mealId?: string) {
+    if (!mealId) return;
+
     this.meals.update(current => current.filter(m => m.id !== mealId));
   }
 }

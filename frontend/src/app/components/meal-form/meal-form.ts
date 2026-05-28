@@ -28,7 +28,6 @@ export class MealForm {
     this.loading.set(true);
 
     const newMeal: Meal = {
-      id: Date.now().toString(),
       ...this.form.value,
     };
 

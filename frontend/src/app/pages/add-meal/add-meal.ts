@@ -1,8 +1,11 @@
 import { Component, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { NutritionAnalysisService } from './services/nutrition-analysis.service';
-import { FoodAnalysisResult, Meal } from '../../models/meal.model';
+import { FoodAnalysisResult } from '../../models/meal.model';
+import { CreateMealRequest, MealService } from '../../services/meal.service';
 
 @Component({
   selector: 'app-add-meal',
@@ -14,12 +17,16 @@ export class AddMeal {
   selectedImage = signal<File | null>(null);
   imagePreview = signal<string | null>(null);
   isAnalyzing = signal(false);
+  isSaving = signal(false);
   analysisResult = signal<FoodAnalysisResult | null>(null);
   showModal = signal(false);
   mealType = signal<'breakfast' | 'lunch' | 'dinner' | 'snack'>('lunch');
   error = signal<string | null>(null);
 
-  constructor(private nutritionService: NutritionAnalysisService) {}
+  constructor(
+    private nutritionService: NutritionAnalysisService,
+    private mealService: MealService,
+  ) {}
 
   onImageSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -69,20 +76,31 @@ export class AddMeal {
     const result = this.analysisResult();
     if (!result) return;
 
-    const meal: Meal = {
-      id: Date.now().toString(),
+    const meal: CreateMealRequest = {
       name: result.name,
       calories: result.calories,
       proteins: result.proteins_g,
       carbs: result.carbs_g,
       fats: result.fats_g,
-      time: new Date().toLocaleTimeString(),
       type: this.mealType(),
     };
 
-    console.log('Comida guardada:', meal);
-    this.showModal.set(false);
-    // TODO: Guardar en el servidor/almacenamiento
+    this.isSaving.set(true);
+    this.error.set(null);
+
+    this.mealService
+      .createMeal(meal)
+      .pipe(finalize(() => this.isSaving.set(false)))
+      .subscribe({
+        next: () => {
+          this.showModal.set(false);
+          this.reset();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.error.set(this.getSaveMealErrorMessage(error));
+          this.showModal.set(false);
+        },
+      });
   }
 
   reset(): void {
@@ -91,5 +109,17 @@ export class AddMeal {
     this.analysisResult.set(null);
     this.showModal.set(false);
     this.error.set(null);
+  }
+
+  private getSaveMealErrorMessage(error: HttpErrorResponse): string {
+    const message = error.error?.message;
+
+    if (Array.isArray(message)) {
+      return message.join(' ');
+    }
+
+    return typeof message === 'string'
+      ? message
+      : 'No se pudo guardar la comida. Intenta nuevamente.';
   }
 }

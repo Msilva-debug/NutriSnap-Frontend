@@ -121,17 +121,18 @@
         </div>
       } @else {
         <div class="space-y-3">
-          @for (meal of meals(); track meal.id) {
+          @for (meal of meals(); track meal.id ?? $index) {
             <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
               <div class="flex-1">
                 <p class="font-medium text-gray-800">{{ meal.name }}</p>
                 <div class="flex items-center gap-4 mt-1 text-sm text-gray-500">
-                  <span>⏰ {{ meal.time }}</span>
+                  <span>⏰ {{ meal?.time }}</span>
                   <span class="text-primary-600 font-semibold">{{ meal.calories }} kcal</span>
                 </div>
               </div>
               <button
                 (click)="deleteMeal(meal.id)"
+                [disabled]="!meal.id"
                 class="text-red-500 hover:text-red-700 font-semibold transition ml-4"
               >
                 ✕
