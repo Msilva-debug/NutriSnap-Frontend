@@ -14,6 +14,7 @@ export interface CreateUserRequest {
   height: number;
   sex: string;
   activityLevel: string;
+  goal: string;
 }
 
 @Injectable({

@@ -14,11 +14,62 @@ import { CreateUserRequest, UserService } from '../../services/user.service';
   selector: 'app-register',
   imports: [ReactiveFormsModule, RouterLink, RabbitIcon],
   templateUrl: './register.html',
-  styles: ``,
+  styles: `
+    .register-card-scroll {
+      scrollbar-color: var(--color-primary-400) var(--color-primary-50);
+      scrollbar-width: thin;
+    }
+
+    .register-card-scroll::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .register-card-scroll::-webkit-scrollbar-track {
+      background: var(--color-primary-50);
+      border-radius: 999px;
+    }
+
+    .register-card-scroll::-webkit-scrollbar-thumb {
+      background: var(--color-primary-400);
+      border: 2px solid var(--color-primary-50);
+      border-radius: 999px;
+    }
+
+    .register-card-scroll::-webkit-scrollbar-thumb:hover {
+      background: var(--color-primary-500);
+    }
+  `,
 })
 export class Register implements OnInit {
   form: FormGroup;
   activityLevels: ActivityLevel[] = [];
+  goals = [
+    {
+      value: 'lose_fat',
+      label: 'Perder grasa',
+      description: 'Quiero bajar mi porcentaje de grasa de forma progresiva.',
+    },
+    {
+      value: 'gain_muscle',
+      label: 'Ganar masa muscular',
+      description: 'Quiero aumentar peso priorizando músculo y rendimiento.',
+    },
+    {
+      value: 'body_recomposition',
+      label: 'Recomposición corporal',
+      description: 'Quiero perder grasa y ganar músculo al mismo tiempo.',
+    },
+    {
+      value: 'maintain_weight',
+      label: 'Mantener mi peso',
+      description: 'Quiero sostener mi peso actual y mejorar mis hábitos.',
+    },
+    {
+      value: 'improve_habits',
+      label: 'Mejorar mi alimentación',
+      description: 'Quiero comer mejor sin enfocarme en cambiar mi peso.',
+    },
+  ];
   loading = signal(false);
   errorMsg = signal('');
   step = signal<1 | 2>(1);
@@ -40,6 +91,7 @@ export class Register implements OnInit {
       height: ['1.70', [Validators.required, Validators.min(50), Validators.max(250)]],
       sex: ['', Validators.required],
       activityLevel: ['', Validators.required],
+      goal: ['', Validators.required],
     });
   }
   ngOnInit(): void {
@@ -111,6 +163,7 @@ export class Register implements OnInit {
       height: Number(formValue.height),
       sex: formValue.sex,
       activityLevel: formValue.activityLevel,
+      goal: formValue.goal,
     };
   }
 
@@ -155,5 +208,8 @@ export class Register implements OnInit {
   }
   get activityLevel() {
     return this.form.get('activityLevel')!;
+  }
+  get goal() {
+    return this.form.get('goal')!;
   }
 }
