@@ -26,9 +26,20 @@ export class MealService {
   ) {}
 
   createMeal(createMealDto: CreateMealRequest): Observable<Meal> {
-    const token = this.authService.getToken();
-    const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
+    return this.http.post<Meal>(this.mealUrl, createMealDto, {
+      headers: this.getAuthHeaders(),
+    });
+  }
 
-    return this.http.post<Meal>(this.mealUrl, createMealDto, { headers });
+  findToday(): Observable<Meal[]> {
+    return this.http.get<Meal[]>(`${this.mealUrl}/today`, {
+      headers: this.getAuthHeaders(),
+    });
+  }
+
+  private getAuthHeaders(): { Authorization: string } | undefined {
+    const token = this.authService.getToken();
+
+    return token ? { Authorization: `Bearer ${token}` } : undefined;
   }
 }

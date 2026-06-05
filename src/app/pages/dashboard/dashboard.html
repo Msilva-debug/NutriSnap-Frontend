@@ -20,11 +20,20 @@
           </div>
 
           <!-- Barra de progreso -->
-          <div class="w-full bg-white bg-opacity-30 rounded-full h-4 overflow-hidden">
+          <div
+            class="relative w-full bg-primary-900/35 rounded-full h-5 overflow-hidden ring-1 ring-primary-100/30"
+            role="progressbar"
+            [attr.aria-valuenow]="calorieProgressPercentage"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
             <div
-              class="bg-white h-full rounded-full transition-all duration-300"
-              [style.width.%]="caloriePercentage"
+              class="bg-primary-100 h-full rounded-full transition-all duration-500 ease-out shadow-sm"
+              [style.width.%]="calorieProgressPercentage"
             ></div>
+            <span class="absolute inset-0 flex items-center justify-center text-[11px] font-semibold text-white drop-shadow-sm">
+              {{ Math.round(calorieProgressPercentage) }}%
+            </span>
           </div>
 
           <p class="text-primary-100 mt-3 text-sm">
@@ -63,7 +72,7 @@
               <span class="text-sm text-gray-600">Desayuno</span>
             </div>
             <span class="font-semibold text-gray-800">
-              {{ mealsByType['breakfast'].reduce((s, m) => s + m.calories, 0) }} kcal
+              {{ getCaloriesByType('breakfast') }} kcal
             </span>
           </div>
           <div class="flex items-center justify-between">
@@ -72,7 +81,7 @@
               <span class="text-sm text-gray-600">Almuerzo</span>
             </div>
             <span class="font-semibold text-gray-800">
-              {{ mealsByType['lunch'].reduce((s, m) => s + m.calories, 0) }} kcal
+              {{ getCaloriesByType('lunch') }} kcal
             </span>
           </div>
           <div class="flex items-center justify-between">
@@ -81,7 +90,7 @@
               <span class="text-sm text-gray-600">Cena</span>
             </div>
             <span class="font-semibold text-gray-800">
-              {{ mealsByType['dinner'].reduce((s, m) => s + m.calories, 0) }} kcal
+              {{ getCaloriesByType('dinner') }} kcal
             </span>
           </div>
           <div class="flex items-center justify-between">
@@ -90,7 +99,7 @@
               <span class="text-sm text-gray-600">Merienda</span>
             </div>
             <span class="font-semibold text-gray-800">
-              {{ mealsByType['snack'].reduce((s, m) => s + m.calories, 0) }} kcal
+              {{ getCaloriesByType('snack') }} kcal
             </span>
           </div>
         </div>
@@ -109,7 +118,26 @@
         </a>
       </div>
 
-      @if (meals().length === 0) {
+      @if (isLoadingMeals()) {
+        <div class="flex flex-col items-center justify-center py-12 text-gray-500">
+          <svg class="mb-4 h-8 w-8 animate-spin text-primary-500" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+          </svg>
+          <p>Cargando comidas de hoy...</p>
+        </div>
+      } @else if (mealsError()) {
+        <div class="text-center py-12">
+          <p class="text-red-500 mb-4">{{ mealsError() }}</p>
+          <button
+            type="button"
+            (click)="loadTodayMeals()"
+            class="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2 px-6 rounded-lg transition cursor-pointer"
+          >
+            Reintentar
+          </button>
+        </div>
+      } @else if (meals().length === 0) {
         <div class="text-center py-12">
           <p class="text-gray-400 mb-4">No hay comidas registradas aún.</p>
           <a
@@ -126,7 +154,7 @@
               <div class="flex-1">
                 <p class="font-medium text-gray-800">{{ meal.name }}</p>
                 <div class="flex items-center gap-4 mt-1 text-sm text-gray-500">
-                  <span>⏰ {{ meal?.time }}</span>
+                  <span>⏰ {{ getMealTime(meal) }}</span>
                   <span class="text-primary-600 font-semibold">{{ meal.calories }} kcal</span>
                 </div>
               </div>
