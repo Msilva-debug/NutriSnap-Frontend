@@ -46,19 +46,39 @@
         </div>
 
         <!-- Estadísticas rápidas -->
-        <div class="grid grid-cols-3 gap-4 pt-4 border-t border-white border-opacity-30">
-          <div>
-            <p class="text-primary-100 text-xs">Proteína</p>
-            <p class="text-2xl font-bold">~{{ Math.round(totalCalories * 0.3 / 4) }}g</p>
-          </div>
-          <div>
-            <p class="text-primary-100 text-xs">Carbohidratos</p>
-            <p class="text-2xl font-bold">~{{ Math.round(totalCalories * 0.45 / 4) }}g</p>
-          </div>
-          <div>
-            <p class="text-primary-100 text-xs">Grasas</p>
-            <p class="text-2xl font-bold">~{{ Math.round(totalCalories * 0.25 / 9) }}g</p>
-          </div>
+        <div class="flex flex-col gap-4 pt-4 border-t border-white border-opacity-30 sm:flex-row">
+          @for (macro of macroStats; track macro.label) {
+            <div class="min-w-0 flex-1">
+              <div class="mb-2 flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <p class="truncate text-xs text-primary-100">{{ macro.label }}</p>
+                  <p class="text-2xl font-bold leading-tight">{{ Math.round(macro.consumed) }}g</p>
+                </div>
+                <span class="shrink-0 text-xs font-semibold text-primary-100">
+                  {{ Math.round(macro.percentage) }}%
+                </span>
+              </div>
+
+              <div
+                class="h-2 w-full overflow-hidden rounded-full bg-primary-900/35 ring-1 ring-primary-100/25"
+                role="progressbar"
+                [attr.aria-label]="macro.label"
+                [attr.aria-valuenow]="macro.progress"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              >
+                <div
+                  class="h-full rounded-full transition-all duration-500 ease-out"
+                  [ngClass]="macro.fillClass"
+                  [style.width.%]="macro.progress"
+                ></div>
+              </div>
+
+              <p class="mt-1 text-[11px] text-primary-100">
+                Meta {{ macro.goal }}g
+              </p>
+            </div>
+          }
         </div>
       </div>
 

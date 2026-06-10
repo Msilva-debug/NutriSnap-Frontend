@@ -1,12 +1,11 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { Meal } from '../../models/meal.model';
-import { NutritionPlan } from '../../models/nutrition-plan.model';
 import { MealService } from '../../services/meal.service';
-import { NutritionPlanService } from '../../services/nutrition-plan.service';
+import { NutritionPlanStateService } from '../../services/nutrition-plan-state.service';
 
 interface MacroStat {
   label: string;
@@ -24,13 +23,15 @@ interface MacroStat {
   styles: ``,
 })
 export class Dashboard implements OnInit {
+  private readonly nutritionPlanState = inject(NutritionPlanStateService);
+
   Math = Math;
   meals = signal<Meal[]>([]);
-  nutritionPlan = signal<NutritionPlan | null>(null);
+  readonly nutritionPlan = this.nutritionPlanState.nutritionPlan;
+  // readonly isLoadingNutritionPlan = this.nutritionPlanState.isLoadingNutritionPlan;
+  // readonly nutritionPlanError = this.nutritionPlanState.nutritionPlanError;
   isLoadingMeals = signal(false);
-  isLoadingNutritionPlan = signal(false);
   mealsError = signal<string | null>(null);
-  nutritionPlanError = signal<string | null>(null);
 
   todayDate = signal(new Date().toLocaleDateString('es-ES', {
     weekday: 'long',
@@ -41,14 +42,10 @@ export class Dashboard implements OnInit {
 
   private readonly fallbackCalorieGoal = 2000;
 
-  constructor(
-    private mealService: MealService,
-    private nutritionPlanService: NutritionPlanService,
-  ) {}
+  constructor(private mealService: MealService) {}
 
   ngOnInit(): void {
     this.loadTodayMeals();
-    this.loadNutritionPlan();
   }
 
   get totalCalories() {
@@ -145,22 +142,6 @@ export class Dashboard implements OnInit {
       });
   }
 
-  loadNutritionPlan(): void {
-    this.isLoadingNutritionPlan.set(true);
-    this.nutritionPlanError.set(null);
-
-    this.nutritionPlanService
-      .findMine()
-      .pipe(finalize(() => this.isLoadingNutritionPlan.set(false)))
-      .subscribe({
-        next: (nutritionPlan) => this.nutritionPlan.set(nutritionPlan),
-        error: (error: HttpErrorResponse) => {
-          this.nutritionPlan.set(null);
-          this.nutritionPlanError.set(this.getNutritionPlanErrorMessage(error));
-        },
-      });
-  }
-
   getMealTime(meal: Meal): string {
     if (meal.time) return meal.time;
     if (!meal.createdAt) return 'Sin hora';
@@ -198,22 +179,6 @@ export class Dashboard implements OnInit {
     return typeof message === 'string'
       ? message
       : 'No se pudieron cargar las comidas de hoy. Intenta nuevamente.';
-  }
-
-  private getNutritionPlanErrorMessage(error: HttpErrorResponse): string {
-    if (error.status === 404) {
-      return 'No encontramos tu plan nutricional. Se usará una meta temporal.';
-    }
-
-    const message = error.error?.message;
-
-    if (Array.isArray(message)) {
-      return message.join(' ');
-    }
-
-    return typeof message === 'string'
-      ? message
-      : 'No se pudo cargar tu plan nutricional. Se usará una meta temporal.';
   }
 
   private getMealCalories(meal: Meal): number {

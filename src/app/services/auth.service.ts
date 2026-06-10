@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { AppStore } from '../store/app.store';
 
 export interface LoginRequest {
   email: string;
@@ -20,7 +21,10 @@ export class AuthService {
   private readonly tokenKey = 'access_token';
   private readonly userKey = 'auth_user';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private appStore: AppStore,
+  ) {}
 
   login(loginDto: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.authUrl}/login`, loginDto).pipe(
@@ -40,6 +44,7 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
+    this.appStore.dispatch({ type: 'auth/logout' });
   }
 
   isTokenExpired(): boolean {
