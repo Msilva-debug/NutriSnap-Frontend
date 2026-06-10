@@ -37,6 +37,16 @@ export class NutritionPlanStateService {
     );
   }
 
+  ensureMineLoaded(): Observable<NutritionPlan | null> {
+    const nutritionPlan = this.nutritionPlan();
+
+    if (nutritionPlan) {
+      return of(nutritionPlan);
+    }
+
+    return this.loadMine();
+  }
+
   private getNutritionPlanErrorMessage(error: HttpErrorResponse): string {
     if (error.status === 404) {
       return 'No encontramos tu plan nutricional. Se usará una meta temporal.';

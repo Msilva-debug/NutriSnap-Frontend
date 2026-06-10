@@ -6,6 +6,7 @@ import { finalize } from 'rxjs';
 import { NutritionAnalysisService } from './services/nutrition-analysis.service';
 import { FoodAnalysisResult } from '../../models/meal.model';
 import { CreateMealRequest, MealService } from '../../services/meal.service';
+import { MealStateService } from '../../services/meal-state.service';
 
 @Component({
   selector: 'app-add-meal',
@@ -26,6 +27,7 @@ export class AddMeal {
   constructor(
     private nutritionService: NutritionAnalysisService,
     private mealService: MealService,
+    private mealState: MealStateService,
   ) {}
 
   onImageSelected(event: Event): void {
@@ -92,7 +94,8 @@ export class AddMeal {
       .createMeal(meal)
       .pipe(finalize(() => this.isSaving.set(false)))
       .subscribe({
-        next: () => {
+        next: (savedMeal) => {
+          this.mealState.addTodayMeal(savedMeal);
           this.showModal.set(false);
           this.reset();
         },

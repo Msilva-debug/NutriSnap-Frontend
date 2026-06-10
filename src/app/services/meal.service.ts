@@ -37,6 +37,12 @@ export class MealService {
     });
   }
 
+  deleteMeal(mealId: string): Observable<unknown> {
+    return this.http.delete(`${this.mealUrl}/${mealId}`, {
+      headers: this.getAuthHeaders(),
+    });
+  }
+
   private getAuthHeaders(): { Authorization: string } | undefined {
     const token = this.authService.getToken();
 

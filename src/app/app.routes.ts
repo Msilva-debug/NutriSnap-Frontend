@@ -41,9 +41,9 @@ export const routes: Routes = [
         ],
       },
       {
-        path: 'settings',
+        path: 'recommendations',
         loadComponent: () =>
-          import('./pages/settings/settings').then((m) => m.Settings),
+          import('./pages/recommendations/recommendations').then((m) => m.Recommendations),
       },
     ],
   },

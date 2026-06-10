@@ -2,9 +2,10 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { finalize, switchMap } from 'rxjs';
+import { finalize, forkJoin, switchMap } from 'rxjs';
 import { RabbitIcon } from '../../components/rabbit-icon/rabbit-icon';
 import { AuthService, LoginRequest } from '../../services/auth.service';
+import { MealStateService } from '../../services/meal-state.service';
 import { NutritionPlanStateService } from '../../services/nutrition-plan-state.service';
 
 @Component({
@@ -19,6 +20,7 @@ export class Login implements OnInit {
   errorMsg = signal('');
   private readonly authService = inject(AuthService);
   private readonly nutritionPlanState = inject(NutritionPlanStateService);
+  private readonly mealState = inject(MealStateService);
   showSessionExpiredModal = signal(false);
   constructor(
     private fb: FormBuilder,
@@ -47,7 +49,10 @@ export class Login implements OnInit {
 
     this.authService
       .login(this.buildLoginRequest())
-      .pipe(switchMap(() => this.nutritionPlanState.loadMine()))
+      .pipe(switchMap(() => forkJoin([
+        this.nutritionPlanState.loadMine(),
+        this.mealState.loadToday(),
+      ])))
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: () => this.router.navigate(['/dashboard']),

@@ -1,10 +1,11 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, HostListener, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
+import { finalize, forkJoin } from 'rxjs';
+import { MealMacroDetail, MealMacroSummary } from '../../components/meal-macro-summary/meal-macro-summary';
 import { Meal } from '../../models/meal.model';
-import { MealService } from '../../services/meal.service';
+import { MealStateService } from '../../services/meal-state.service';
 import { NutritionPlanStateService } from '../../services/nutrition-plan-state.service';
 
 interface MacroStat {
@@ -18,20 +19,24 @@ interface MacroStat {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, MealMacroSummary],
   templateUrl: './dashboard.html',
   styles: ``,
 })
 export class Dashboard implements OnInit {
   private readonly nutritionPlanState = inject(NutritionPlanStateService);
+  private readonly mealState = inject(MealStateService);
 
   Math = Math;
-  meals = signal<Meal[]>([]);
+  readonly meals = this.mealState.todayMeals;
+  selectedMeal = signal<Meal | null>(null);
   readonly nutritionPlan = this.nutritionPlanState.nutritionPlan;
   // readonly isLoadingNutritionPlan = this.nutritionPlanState.isLoadingNutritionPlan;
   // readonly nutritionPlanError = this.nutritionPlanState.nutritionPlanError;
-  isLoadingMeals = signal(false);
-  mealsError = signal<string | null>(null);
+  readonly isLoadingMeals = this.mealState.isLoadingTodayMeals;
+  readonly mealsError = this.mealState.todayMealsError;
+  deletingMealIds = signal<Set<string>>(new Set());
+  mealActionError = signal<string | null>(null);
 
   todayDate = signal(new Date().toLocaleDateString('es-ES', {
     weekday: 'long',
@@ -41,11 +46,18 @@ export class Dashboard implements OnInit {
   }));
 
   private readonly fallbackCalorieGoal = 2000;
-
-  constructor(private mealService: MealService) {}
+  private readonly mealTypeLabels: Record<Meal['type'], string> = {
+    breakfast: 'Desayuno',
+    lunch: 'Almuerzo',
+    dinner: 'Cena',
+    snack: 'Merienda',
+  };
 
   ngOnInit(): void {
-    this.loadTodayMeals();
+    forkJoin([
+      this.nutritionPlanState.ensureMineLoaded(),
+      this.mealState.ensureTodayLoaded(),
+    ]).subscribe();
   }
 
   get totalCalories() {
@@ -127,19 +139,17 @@ export class Dashboard implements OnInit {
   }
 
   loadTodayMeals(): void {
-    this.isLoadingMeals.set(true);
-    this.mealsError.set(null);
+    this.mealActionError.set(null);
+    this.mealState.loadToday().subscribe();
+  }
 
-    this.mealService
-      .findToday()
-      .pipe(finalize(() => this.isLoadingMeals.set(false)))
-      .subscribe({
-        next: (meals) => this.meals.set(meals ?? []),
-        error: (error: HttpErrorResponse) => {
-          this.meals.set([]);
-          this.mealsError.set(this.getMealsErrorMessage(error));
-        },
-      });
+  openMealModal(meal: Meal): void {
+    this.selectedMeal.set(meal);
+  }
+
+  @HostListener('document:keydown.escape')
+  closeMealModal(): void {
+    this.selectedMeal.set(null);
   }
 
   getMealTime(meal: Meal): string {
@@ -155,21 +165,97 @@ export class Dashboard implements OnInit {
     });
   }
 
+  getMealDate(meal: Meal): string {
+    const dateValue = meal.createdAt ?? meal.updatedAt;
+    if (!dateValue) return 'Fecha no disponible';
+
+    const date = new Date(dateValue);
+    if (Number.isNaN(date.getTime())) return 'Fecha no disponible';
+
+    return date.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  }
+
+  getMealTypeLabel(type: Meal['type']): string {
+    return this.mealTypeLabels[type];
+  }
+
+  getMealMacroDetails(meal: Meal): MealMacroDetail[] {
+    const macros = [
+      {
+        label: 'Proteínas',
+        value: this.getMealMacro(meal.proteins),
+        fillClass: 'bg-primary-500',
+      },
+      {
+        label: 'Carbohidratos',
+        value: this.getMealMacro(meal.carbs),
+        fillClass: 'bg-primary-300',
+      },
+      {
+        label: 'Grasas',
+        value: this.getMealMacro(meal.fats),
+        fillClass: 'bg-secondary-600',
+      },
+    ];
+    const totalMacros = macros.reduce((sum, macro) => sum + macro.value, 0);
+
+    return macros.map((macro) => ({
+      ...macro,
+      progress: totalMacros > 0 ? (macro.value / totalMacros) * 100 : 0,
+    }));
+  }
+
   getCaloriesByType(type: Meal['type']): number {
     return this.mealsByType[type].reduce((sum, meal) => sum + this.getMealCalories(meal), 0);
   }
 
+  isDeletingMeal(mealId?: string): boolean {
+    return !!mealId && this.deletingMealIds().has(mealId);
+  }
+
   addMeal(meal: Meal) {
-    this.meals.update(current => [meal, ...current]);
+    this.mealState.addTodayMeal(meal);
   }
 
   deleteMeal(mealId?: string) {
     if (!mealId) return;
 
-    this.meals.update(current => current.filter(m => m.id !== mealId));
+    this.mealActionError.set(null);
+    this.deletingMealIds.update((current) => new Set(current).add(mealId));
+
+    this.mealState
+      .deleteTodayMeal(mealId)
+      .pipe(
+        finalize(() => {
+          this.deletingMealIds.update((current) => {
+            const next = new Set(current);
+            next.delete(mealId);
+            return next;
+          });
+        }),
+      )
+      .subscribe({
+        next: () => {
+          if (this.selectedMeal()?.id === mealId) {
+            this.closeMealModal();
+          }
+        },
+        error: (error: HttpErrorResponse) => {
+          this.mealActionError.set(this.getDeleteMealErrorMessage(error));
+        },
+      });
   }
 
-  private getMealsErrorMessage(error: HttpErrorResponse): string {
+  private getDeleteMealErrorMessage(error: HttpErrorResponse): string {
+    if (error.status === 404) {
+      return 'No encontramos esa comida. Actualiza la lista e intenta nuevamente.';
+    }
+
     const message = error.error?.message;
 
     if (Array.isArray(message)) {
@@ -178,7 +264,7 @@ export class Dashboard implements OnInit {
 
     return typeof message === 'string'
       ? message
-      : 'No se pudieron cargar las comidas de hoy. Intenta nuevamente.';
+      : 'No se pudo eliminar la comida. Intenta nuevamente.';
   }
 
   private getMealCalories(meal: Meal): number {

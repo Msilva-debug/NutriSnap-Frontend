@@ -138,6 +138,12 @@
         </a>
       </div>
 
+      @if (mealActionError()) {
+        <p class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+          {{ mealActionError() }}
+        </p>
+      }
+
       @if (isLoadingMeals()) {
         <div class="flex flex-col items-center justify-center py-12 text-gray-500">
           <svg class="mb-4 h-8 w-8 animate-spin text-primary-500" fill="none" viewBox="0 0 24 24">
@@ -170,20 +176,33 @@
       } @else {
         <div class="space-y-3">
           @for (meal of meals(); track meal.id ?? $index) {
-            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-              <div class="flex-1">
-                <p class="font-medium text-gray-800">{{ meal.name }}</p>
-                <div class="flex items-center gap-4 mt-1 text-sm text-gray-500">
-                  <span>⏰ {{ getMealTime(meal) }}</span>
-                  <span class="text-primary-600 font-semibold">{{ meal.calories }} kcal</span>
-                </div>
-              </div>
+            <div class="flex items-stretch overflow-hidden border border-gray-200 rounded-lg hover:bg-gray-50 transition">
               <button
-                (click)="deleteMeal(meal.id)"
-                [disabled]="!meal.id"
-                class="text-red-500 hover:text-red-700 font-semibold transition ml-4 cursor-pointer disabled:cursor-not-allowed"
+                type="button"
+                (click)="openMealModal(meal)"
+                class="flex min-w-0 flex-1 items-center justify-between p-4 text-left transition cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-400"
               >
-                ✕
+                <div class="min-w-0 flex-1">
+                  <p class="truncate font-medium text-gray-800">{{ meal.name }}</p>
+                  <div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500">
+                    <span>⏰ {{ getMealTime(meal) }}</span>
+                    <span class="text-primary-600 font-semibold">{{ meal.calories }} kcal</span>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                (click)="$event.stopPropagation(); deleteMeal(meal.id)"
+                [disabled]="!meal.id || isDeletingMeal(meal.id)"
+                class="min-w-12 px-4 text-red-500 hover:bg-red-50 hover:text-red-700 font-semibold transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                aria-label="Eliminar comida"
+              >
+                @if (isDeletingMeal(meal.id)) {
+                  ...
+                } @else {
+                  ✕
+                }
               </button>
             </div>
           }
@@ -193,6 +212,67 @@
 
   </div>
 </div>
+
+@if (selectedMeal(); as meal) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 p-4"
+    (click)="closeMealModal()"
+  >
+    <div
+      class="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="meal-detail-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex items-start justify-between gap-4 border-b border-gray-100 p-5">
+        <div class="min-w-0">
+          <p class="text-sm font-semibold text-primary-600">
+            {{ getMealTypeLabel(meal.type) }}
+          </p>
+          <h2 id="meal-detail-title" class="mt-1 truncate text-2xl font-bold text-gray-900">
+            {{ meal.name }}
+          </h2>
+          <p class="mt-1 text-sm capitalize text-gray-500">
+            {{ getMealDate(meal) }} - {{ getMealTime(meal) }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          (click)="closeMealModal()"
+          class="rounded-lg px-3 py-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-800 cursor-pointer"
+          aria-label="Cerrar detalle de comida"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="space-y-5 p-5">
+        <div class="rounded-xl bg-primary-50 p-4">
+          <p class="text-sm font-medium text-primary-700">Calorías</p>
+          <p class="mt-1 text-4xl font-bold text-primary-700">{{ meal.calories }} kcal</p>
+        </div>
+
+        <div>
+          <h3 class="mb-3 text-sm font-semibold uppercase text-gray-500">Macronutrientes</h3>
+          <app-meal-macro-summary [macros]="getMealMacroDetails(meal)" />
+        </div>
+
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div class="rounded-xl border border-gray-200 p-4">
+            <p class="text-xs font-medium text-gray-500">Registrada</p>
+            <p class="mt-1 text-sm font-semibold capitalize text-gray-800">{{ getMealDate(meal) }}</p>
+          </div>
+          <div class="rounded-xl border border-gray-200 p-4">
+            <p class="text-xs font-medium text-gray-500">Hora</p>
+            <p class="mt-1 text-sm font-semibold text-gray-800">{{ getMealTime(meal) }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
 
 <!-- Para usar Math en template -->
 <div style="display: none;">
