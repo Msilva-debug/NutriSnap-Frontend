@@ -4,12 +4,14 @@ import { catchError, Observable, of, tap } from 'rxjs';
 import { Meal } from '../models/meal.model';
 import { AppStore } from '../store/app.store';
 import { MealService } from './meal.service';
+import { MealSocketService } from './meal-socket.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MealStateService {
   private readonly mealService = inject(MealService);
+  private readonly mealSocketService = inject(MealSocketService);
   private readonly store = inject(AppStore);
 
   readonly todayMeals = this.store.todayMeals;
@@ -18,6 +20,7 @@ export class MealStateService {
   readonly todayMealsError = this.store.todayMealsError;
 
   loadToday(): Observable<Meal[]> {
+    this.mealSocketService.connect();
     this.store.dispatch({ type: 'todayMeals/loadStart' });
 
     return this.mealService.findToday().pipe(
@@ -39,10 +42,13 @@ export class MealStateService {
   }
 
   addTodayMeal(meal: Meal): void {
+    this.mealSocketService.connect();
     this.store.dispatch({ type: 'todayMeals/add', meal });
   }
 
   ensureTodayLoaded(): Observable<Meal[]> {
+    this.mealSocketService.connect();
+
     if (this.todayMealsDate() === this.getTodayStorageDate()) {
       return of(this.todayMeals());
     }

@@ -173,10 +173,14 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case 'todayMeals/add': {
       const todayDate = getTodayStorageDate();
       const currentMeals = state.todayMealsDate === todayDate ? state.todayMeals : [];
+      const mealId = action.meal.id;
+      const mealsWithoutCurrent = mealId
+        ? currentMeals.filter((meal) => String(meal.id) !== String(mealId))
+        : currentMeals;
 
       return {
         ...state,
-        todayMeals: [action.meal, ...currentMeals],
+        todayMeals: [action.meal, ...mealsWithoutCurrent],
         todayMealsDate: todayDate,
         todayMealsError: null,
       };
@@ -217,19 +221,19 @@ export class AppStore {
       const nextState = appReducer(state, action);
 
       if (
-        action.type === 'nutritionPlan/loadSuccess'
-        || action.type === 'nutritionPlan/loadFailure'
-        || action.type === 'auth/logout'
+        action.type === 'nutritionPlan/loadSuccess' ||
+        action.type === 'nutritionPlan/loadFailure' ||
+        action.type === 'auth/logout'
       ) {
         persistNutritionPlan(nextState.nutritionPlan);
       }
 
       if (
-        action.type === 'todayMeals/loadSuccess'
-        || action.type === 'todayMeals/loadFailure'
-        || action.type === 'todayMeals/add'
-        || action.type === 'todayMeals/remove'
-        || action.type === 'auth/logout'
+        action.type === 'todayMeals/loadSuccess' ||
+        action.type === 'todayMeals/loadFailure' ||
+        action.type === 'todayMeals/add' ||
+        action.type === 'todayMeals/remove' ||
+        action.type === 'auth/logout'
       ) {
         persistTodayMeals(nextState.todayMeals, nextState.todayMealsDate);
       }

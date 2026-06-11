@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { Observable, Subject, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AppStore } from '../store/app.store';
 
@@ -20,6 +20,8 @@ export class AuthService {
   private readonly authUrl = `${environment.urlBackend.replace(/\/$/, '')}/auth`;
   private readonly tokenKey = 'access_token';
   private readonly userKey = 'auth_user';
+  private readonly logoutSubject = new Subject<void>();
+  readonly logout$ = this.logoutSubject.asObservable();
 
   constructor(
     private http: HttpClient,
@@ -45,6 +47,7 @@ export class AuthService {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
     this.appStore.dispatch({ type: 'auth/logout' });
+    this.logoutSubject.next();
   }
 
   isTokenExpired(): boolean {
