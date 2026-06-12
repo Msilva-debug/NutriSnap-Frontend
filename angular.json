@@ -88,6 +88,11 @@
               "buildTarget": "frontend:build:development"
             }
           },
+          "options": {
+            "allowedHosts": [
+              "*.ngrok-free.app"
+            ]
+          },
           "defaultConfiguration": "development"
         }
       }

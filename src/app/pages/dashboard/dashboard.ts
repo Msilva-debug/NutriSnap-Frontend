@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
 import { MealMacroDetail, MealMacroSummary } from '../../components/meal-macro-summary/meal-macro-summary';
+import { NutrientOverageAlert } from '../../components/nutrient-overage-alert/nutrient-overage-alert';
 import { Meal } from '../../models/meal.model';
 import { MealStateService } from '../../services/meal-state.service';
 import { NutritionPlanStateService } from '../../services/nutrition-plan-state.service';
@@ -14,12 +15,13 @@ interface MacroStat {
   goal: number;
   percentage: number;
   progress: number;
+  overage: number;
   fillClass: string;
 }
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, RouterLink, MealMacroSummary],
+  imports: [CommonModule, RouterLink, MealMacroSummary, NutrientOverageAlert],
   templateUrl: './dashboard.html',
   styles: ``,
 })
@@ -92,6 +94,10 @@ export class Dashboard implements OnInit {
     return this.getProgressPercentage(this.totalCalories, this.calorieGoal);
   }
 
+  get calorieOverage() {
+    return Math.max(this.totalCalories - this.calorieGoal, 0);
+  }
+
   get macroStats(): MacroStat[] {
     const proteinGoal = this.getMacroGoal(this.nutritionPlan()?.proteinGoal, 0.3, 4);
     const carbsGoal = this.getMacroGoal(this.nutritionPlan()?.carbsGoal, 0.45, 4);
@@ -104,6 +110,7 @@ export class Dashboard implements OnInit {
         goal: proteinGoal,
         percentage: this.getPercentage(this.totalProteins, proteinGoal),
         progress: this.getProgressPercentage(this.totalProteins, proteinGoal),
+        overage: this.getOverage(this.totalProteins, proteinGoal),
         fillClass: 'bg-primary-100',
       },
       {
@@ -112,6 +119,7 @@ export class Dashboard implements OnInit {
         goal: carbsGoal,
         percentage: this.getPercentage(this.totalCarbs, carbsGoal),
         progress: this.getProgressPercentage(this.totalCarbs, carbsGoal),
+        overage: this.getOverage(this.totalCarbs, carbsGoal),
         fillClass: 'bg-primary-200',
       },
       {
@@ -120,6 +128,7 @@ export class Dashboard implements OnInit {
         goal: fatsGoal,
         percentage: this.getPercentage(this.totalFats, fatsGoal),
         progress: this.getProgressPercentage(this.totalFats, fatsGoal),
+        overage: this.getOverage(this.totalFats, fatsGoal),
         fillClass: 'bg-accent-500',
       },
     ];
@@ -301,5 +310,11 @@ export class Dashboard implements OnInit {
 
   private getProgressPercentage(consumed: number, goal: unknown): number {
     return Math.min(Math.max(this.getPercentage(consumed, goal), 0), 100);
+  }
+
+  private getOverage(consumed: number, goal: unknown): number {
+    const goalValue = this.getPositiveNumber(goal);
+
+    return Math.max(consumed - goalValue, 0);
   }
 }
