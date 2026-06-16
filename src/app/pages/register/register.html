@@ -79,11 +79,14 @@
               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400 transition"
               [class.border-red-400]="email.invalid && email.touched"
             />
+            @if (email.pending) {
+              <p class="text-primary-500 text-xs mt-1">Validando correo...</p>
+            }
             @if (email.invalid && email.touched) {
               <p class="text-red-500 text-xs mt-1">
                 @if (email.hasError('required')) {
                   El correo es obligatorio.
-                } @else {
+                } @else if (email.hasError('email')) {
                   Ingresa un correo válido.
                 }
               </p>
@@ -124,9 +127,14 @@
           <button
             type="button"
             (click)="goToStep2()"
-            class="w-full py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition shadow-md cursor-pointer"
+            [disabled]="email.pending"
+            class="w-full py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition shadow-md cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Siguiente →
+            @if (email.pending) {
+              Validando...
+            } @else {
+              Siguiente →
+            }
           </button>
         }
 
@@ -290,6 +298,76 @@
             @if (goal.invalid && goal.touched) {
               <p class="text-red-500 text-xs mt-1">Selecciona tu objetivo principal.</p>
             }
+          </div>
+
+          <div class="mb-6 border-t border-gray-100 pt-5">
+            <div class="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <h3 class="text-sm font-semibold text-gray-700">Apariencia</h3>
+                <p class="text-xs text-gray-400">Colores de tu cuenta</p>
+              </div>
+
+              <div
+                class="flex items-center gap-1 rounded-full border border-gray-200 bg-white p-1"
+                aria-hidden="true"
+              >
+                <span
+                  class="h-7 w-7 rounded-full ring-1 ring-black/10"
+                  [style.background]="themeService.selectedPrimaryColor()"
+                ></span>
+                <span
+                  class="h-7 w-7 rounded-full ring-1 ring-black/10"
+                  [style.background]="themeService.selectedSecondaryColor()"
+                ></span>
+              </div>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-2">
+              <app-theme-color-picker
+                label="Primario"
+                [color]="themeService.theme().primaryColor"
+                (colorChange)="selectPrimaryColor($event)"
+              />
+
+              <app-theme-color-picker
+                label="Secundario"
+                [color]="themeService.theme().secondaryColor"
+                (colorChange)="selectSecondaryColor($event)"
+              />
+            </div>
+
+            <div class="mt-4 overflow-hidden rounded-xl border border-gray-200">
+              <div
+                class="p-4"
+                [style.background]="
+                  'linear-gradient(135deg, ' +
+                  themeService.selectedPrimaryColor() +
+                  ', ' +
+                  themeService.selectedSecondaryColor() +
+                  ')'
+                "
+                [style.color]="themeService.selectedPrimaryContrast()"
+              >
+                <p class="text-xs font-semibold opacity-80">Vista previa</p>
+                <p class="mt-2 text-lg font-bold">CalorieTrack</p>
+                <div class="mt-4 h-2 overflow-hidden rounded-full bg-white/35">
+                  <div
+                    class="h-full w-2/3 rounded-full"
+                    [style.background]="themeService.selectedPrimaryContrast()"
+                  ></div>
+                </div>
+              </div>
+              <div class="flex items-center justify-between bg-white px-4 py-3">
+                <span class="text-sm font-semibold text-gray-700">Botón principal</span>
+                <span
+                  class="rounded-lg px-3 py-1.5 text-xs font-bold"
+                  [style.background]="themeService.selectedPrimaryColor()"
+                  [style.color]="themeService.selectedPrimaryContrast()"
+                >
+                  Acción
+                </span>
+              </div>
+            </div>
           </div>
 
           @if (errorMsg()) {

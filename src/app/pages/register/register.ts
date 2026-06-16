@@ -1,18 +1,28 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  AsyncValidatorFn,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
+import { Observable, catchError, finalize, map, of, switchMap, timer } from 'rxjs';
 import {
   ActivityLevel,
   NutritionAnalysisService,
 } from '../add-meal/services/nutrition-analysis.service';
 import { RabbitIcon } from '../../components/rabbit-icon/rabbit-icon';
+import { ThemeColorPicker } from '../../components/theme-color-picker/theme-color-picker';
 import { CreateUserRequest, UserService } from '../../services/user.service';
+import { ThemeService } from '../../services/theme.service';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink, RabbitIcon],
+  imports: [ReactiveFormsModule, RouterLink, RabbitIcon, ThemeColorPicker],
   templateUrl: './register.html',
   styles: `
     .register-card-scroll {
@@ -74,14 +84,22 @@ export class Register implements OnInit {
   errorMsg = signal('');
   step = signal<1 | 2>(1);
   private readonly userService = inject(UserService);
+  readonly themeService = inject(ThemeService);
   nutritionService = inject(NutritionAnalysisService);
+  private emailRequestErrorMessage = '';
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
   ) {
     this.form = this.fb.group({
-      email: ['mateocelis1550@gmail.com', [Validators.required, Validators.email]],
+      email: [
+        'mateocelis1550@gmail.com',
+        {
+          validators: [Validators.required, Validators.email],
+          asyncValidators: [this.emailAvailabilityValidator()],
+        },
+      ],
       password: ['Mateosilva01', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['Mateosilva01', Validators.required],
       name: ['Mateo', Validators.required],
@@ -106,8 +124,16 @@ export class Register implements OnInit {
   }
 
   goToStep2() {
-    const { email, password, confirmPassword } = this.form.value;
-    if (!email || !password || password.length < 6) return;
+    this.email.markAsTouched();
+    this.password.markAsTouched();
+    this.confirmPassword.markAsTouched();
+
+    const { password, confirmPassword } = this.form.value;
+    if (this.email.pending || this.email.invalid || !password || password.length < 6) {
+      this.setEmailValidationErrorMessage();
+      return;
+    }
+
     if (password !== confirmPassword) {
       this.errorMsg.set('Las contraseñas no coinciden.');
       return;
@@ -134,9 +160,84 @@ export class Register implements OnInit {
       });
   }
 
+  selectPrimaryColor(color: string): void {
+    this.themeService.setPrimaryColor(color);
+  }
+
+  selectSecondaryColor(color: string): void {
+    this.themeService.setSecondaryColor(color);
+  }
+
+  private emailAvailabilityValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      const email = String(control.value ?? '').trim();
+
+      if (!email || control.hasError('required') || control.hasError('email')) {
+        return of(null);
+      }
+
+      return timer(450).pipe(
+        switchMap(() => this.userService.emailExists(email)),
+        map((response) => {
+          if (response.exists) {
+            this.setEmailRequestErrorMessage(response.message);
+            return { emailTaken: { message: response.message } };
+          }
+
+          this.clearEmailRequestErrorMessage();
+
+          return null;
+        }),
+        catchError((error: HttpErrorResponse) => {
+          const message = this.getBackendErrorMessage(error);
+          this.setEmailRequestErrorMessage(message);
+
+          return of({ emailValidationFailed: { message } });
+        }),
+      );
+    };
+  }
+
+  private setEmailValidationErrorMessage(): void {
+    const emailTakenError = this.email.getError('emailTaken') as { message?: string | null } | null;
+    if (emailTakenError?.message) {
+      this.errorMsg.set(emailTakenError.message);
+      return;
+    }
+
+    const validationFailedError = this.email.getError('emailValidationFailed') as {
+      message?: string | null;
+    } | null;
+    if (validationFailedError?.message) {
+      this.errorMsg.set(validationFailedError.message);
+    }
+  }
+
+  private setEmailRequestErrorMessage(message: string | null): void {
+    this.emailRequestErrorMessage = message ?? '';
+
+    if (this.emailRequestErrorMessage) {
+      this.errorMsg.set(this.emailRequestErrorMessage);
+    }
+  }
+
+  private clearEmailRequestErrorMessage(): void {
+    if (this.emailRequestErrorMessage && this.errorMsg() === this.emailRequestErrorMessage) {
+      this.errorMsg.set('');
+    }
+
+    this.emailRequestErrorMessage = '';
+  }
+
   private canSubmit(): boolean {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+
+      if (this.email.invalid) {
+        this.setEmailValidationErrorMessage();
+        this.step.set(1);
+      }
+
       return false;
     }
 
@@ -151,6 +252,7 @@ export class Register implements OnInit {
 
   private buildCreateUserRequest(): CreateUserRequest {
     const formValue = this.form.getRawValue();
+    const theme = this.themeService.theme();
 
     return {
       email: formValue.email,
@@ -164,19 +266,25 @@ export class Register implements OnInit {
       sex: formValue.sex,
       activityLevel: formValue.activityLevel,
       goal: formValue.goal,
+      primaryColor: theme.primaryColor,
+      secondaryColor: theme.secondaryColor,
     };
   }
 
   private getRegisterErrorMessage(error: HttpErrorResponse): string {
+    const message = this.getBackendErrorMessage(error);
+
+    return message ?? 'No se pudo crear la cuenta. Intenta nuevamente.';
+  }
+
+  private getBackendErrorMessage(error: HttpErrorResponse): string | null {
     const message = error.error?.message;
 
     if (Array.isArray(message)) {
       return message.join(' ');
     }
 
-    return typeof message === 'string'
-      ? message
-      : 'No se pudo crear la cuenta. Intenta nuevamente.';
+    return typeof message === 'string' ? message : null;
   }
 
   get email() {
