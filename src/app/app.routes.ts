@@ -45,6 +45,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/recommendations/recommendations').then((m) => m.Recommendations),
       },
+      {
+        path: 'configuration',
+        loadComponent: () =>
+          import('./pages/configuration/configuration').then((m) => m.Configuration),
+      },
     ],
   },
 ];

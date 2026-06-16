@@ -159,7 +159,7 @@ function createThemeScale(color: string): ThemeScale {
   };
 }
 
-function getContrastColor(hex: string): string {
+export function getContrastColor(hex: string): string {
   const color = hexToRgb(hex);
   const red = toLinearRgb(color.red);
   const green = toLinearRgb(color.green);

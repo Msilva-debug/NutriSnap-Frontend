@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { AppTheme, normalizeHexColor } from './theme.service';
+import { AuthService } from './auth.service';
 
 export interface CreateUserRequest {
   email: string;
@@ -36,13 +38,20 @@ export interface EmailExistsResult {
   message: string | null;
 }
 
+type UpdateThemeResponse = Partial<AppTheme> & {
+  user?: Partial<AppTheme>;
+};
+
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
   private readonly usersUrl = `${environment.urlBackend.replace(/\/$/, '')}/users`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+  ) {}
 
   createUser(createUserDto: CreateUserRequest): Observable<unknown> {
     return this.http.post(this.usersUrl, createUserDto);
@@ -54,6 +63,14 @@ export class UserService {
         params: { email },
       })
       .pipe(map((response) => this.parseEmailExistsResponse(response)));
+  }
+
+  updateTheme(theme: AppTheme): Observable<AppTheme> {
+    return this.http
+      .patch<UpdateThemeResponse>(`${this.usersUrl}/theme-colors`, theme, {
+        headers: this.getAuthHeaders(),
+      })
+      .pipe(map((response) => this.parseUpdateThemeResponse(response, theme)));
   }
 
   private parseEmailExistsResponse(response: EmailExistsResponse): EmailExistsResult {
@@ -90,5 +107,20 @@ export class UserService {
     }
 
     return response.message ?? null;
+  }
+
+  private parseUpdateThemeResponse(response: UpdateThemeResponse, fallbackTheme: AppTheme): AppTheme {
+    const theme = 'user' in response && response.user ? response.user : response;
+
+    return {
+      primaryColor: normalizeHexColor(theme.primaryColor) ?? fallbackTheme.primaryColor,
+      secondaryColor: normalizeHexColor(theme.secondaryColor) ?? fallbackTheme.secondaryColor,
+    };
+  }
+
+  private getAuthHeaders(): { Authorization: string } | undefined {
+    const token = this.authService.getToken();
+
+    return token ? { Authorization: `Bearer ${token}` } : undefined;
   }
 }
