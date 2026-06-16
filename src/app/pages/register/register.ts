@@ -16,13 +16,13 @@ import {
   NutritionAnalysisService,
 } from '../add-meal/services/nutrition-analysis.service';
 import { RabbitIcon } from '../../components/rabbit-icon/rabbit-icon';
-import { ThemeColorPicker } from '../../components/theme-color-picker/theme-color-picker';
+import { ThemeCustomizer } from '../../components/theme-customizer/theme-customizer';
 import { CreateUserRequest, UserService } from '../../services/user.service';
-import { ThemeService } from '../../services/theme.service';
+import { AppTheme, ThemeService } from '../../services/theme.service';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink, RabbitIcon, ThemeColorPicker],
+  imports: [ReactiveFormsModule, RouterLink, RabbitIcon, ThemeCustomizer],
   templateUrl: './register.html',
   styles: `
     .register-card-scroll {
@@ -84,7 +84,8 @@ export class Register implements OnInit {
   errorMsg = signal('');
   step = signal<1 | 2>(1);
   private readonly userService = inject(UserService);
-  readonly themeService = inject(ThemeService);
+  private readonly themeService = inject(ThemeService);
+  readonly themeDraft = signal<AppTheme>(this.themeService.theme());
   nutritionService = inject(NutritionAnalysisService);
   private emailRequestErrorMessage = '';
 
@@ -160,12 +161,8 @@ export class Register implements OnInit {
       });
   }
 
-  selectPrimaryColor(color: string): void {
-    this.themeService.setPrimaryColor(color);
-  }
-
-  selectSecondaryColor(color: string): void {
-    this.themeService.setSecondaryColor(color);
+  updateThemeDraft(theme: AppTheme): void {
+    this.themeDraft.set(theme);
   }
 
   private emailAvailabilityValidator(): AsyncValidatorFn {
@@ -252,7 +249,7 @@ export class Register implements OnInit {
 
   private buildCreateUserRequest(): CreateUserRequest {
     const formValue = this.form.getRawValue();
-    const theme = this.themeService.theme();
+    const theme = this.themeDraft();
 
     return {
       email: formValue.email,

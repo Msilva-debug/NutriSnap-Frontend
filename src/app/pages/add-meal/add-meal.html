@@ -1,91 +1,122 @@
-<div class="min-h-screen bg-gray-50 p-4 md:p-8">
-  <div class="max-w-2xl mx-auto">
-
+<div class="min-h-screen bg-gray-50 p-4 md:p-6">
+  <div class="mx-auto max-w-6xl space-y-6">
     <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-2xl font-bold text-gray-900">Registrar comida</h1>
-      <p class="text-gray-500 text-sm mt-1">
+    <header>
+      <h1 class="text-3xl font-bold text-gray-800">Registrar comida</h1>
+      <p class="mt-1 text-gray-500">
         Sube una foto y la IA analizará los nutrientes automáticamente
       </p>
-    </div>
+    </header>
 
-    <!-- Upload area -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-4">
-      <label class="block text-sm font-medium text-gray-700 mb-3">Foto de la comida</label>
+    <div class="mx-auto w-full max-w-3xl space-y-4">
+      <!-- Upload area -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <label class="block text-sm font-medium text-gray-700 mb-3">Foto de la comida</label>
 
-      @if (!imagePreview()) {
-        <label
-          for="imageInput"
-          class="flex flex-col items-center justify-center w-full h-52 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-accent-400 hover:bg-accent-50 transition-colors"
-        >
-          <svg class="w-10 h-10 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-              d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-          </svg>
-          <span class="text-sm text-gray-500">Haz clic para subir una imagen</span>
-          <span class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP</span>
-        </label>
-      } @else {
-        <div class="relative rounded-xl overflow-hidden">
-          <img [src]="imagePreview()" alt="Vista previa" class="w-full max-h-64 object-cover" />
-          <button
-            (click)="reset()"
-            class="absolute top-2 right-2 bg-white/80 hover:bg-white text-gray-600 rounded-full p-1.5 shadow transition-colors cursor-pointer"
+        @if (!imagePreview()) {
+          <label
+            for="imageInput"
+            class="flex flex-col items-center justify-center w-full h-52 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-accent-400 hover:bg-accent-50 transition-colors"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            <svg
+              class="w-10 h-10 text-gray-400 mb-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+              />
             </svg>
-          </button>
+            <span class="text-sm text-gray-500">Haz clic para subir una imagen</span>
+            <span class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP</span>
+          </label>
+        } @else {
+          <div class="relative rounded-xl overflow-hidden">
+            <img [src]="imagePreview()" alt="Vista previa" class="w-full max-h-64 object-cover" />
+            <button
+              (click)="reset()"
+              class="absolute top-2 right-2 bg-white/80 hover:bg-white text-gray-600 rounded-full p-1.5 shadow transition-colors cursor-pointer"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        }
+
+        <input
+          id="imageInput"
+          type="file"
+          accept="image/*"
+          class="hidden"
+          (change)="onImageSelected($event)"
+        />
+      </div>
+
+      <!-- Meal type -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <label class="block text-sm font-medium text-gray-700 mb-3">Tipo de comida</label>
+        <div class="grid grid-cols-4 gap-2">
+          @for (
+            option of [
+              { value: 'breakfast', label: 'Desayuno', icon: '🌅' },
+              { value: 'lunch', label: 'Almuerzo', icon: '☀️' },
+              { value: 'dinner', label: 'Cena', icon: '🌙' },
+              { value: 'snack', label: 'Merienda', icon: '🍎' },
+            ];
+            track option.value
+          ) {
+            <button
+              type="button"
+              (click)="mealType.set($any(option.value))"
+              [class]="
+                mealType() === option.value
+                  ? 'flex flex-col items-center gap-1 p-3 rounded-xl border-2 border-primary-500 bg-primary-50 text-primary-700 cursor-pointer'
+                  : 'flex flex-col items-center gap-1 p-3 rounded-xl border-2 border-gray-200 text-gray-500 hover:border-gray-300 transition-colors cursor-pointer'
+              "
+            >
+              <span class="text-xl">{{ option.icon }}</span>
+              <span class="text-xs font-medium">{{ option.label }}</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Error -->
+      @if (error()) {
+        <div
+          class="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm"
+        >
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+            />
+          </svg>
+          {{ error() }}
         </div>
       }
 
-      <input id="imageInput" type="file" accept="image/*" class="hidden" (change)="onImageSelected($event)" />
+      <!-- Analyze button -->
+      <button
+        (click)="analyzeImage()"
+        [disabled]="!selectedImage() || isAnalyzing()"
+        class="w-full py-3.5 rounded-xl font-semibold text-primary-contrast transition-all bg-primary-500 hover:bg-primary-600 active:scale-95 cursor-pointer disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:scale-100"
+      >
+        Analizar con IA
+      </button>
     </div>
-
-    <!-- Meal type -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-4">
-      <label class="block text-sm font-medium text-gray-700 mb-3">Tipo de comida</label>
-      <div class="grid grid-cols-4 gap-2">
-        @for (option of [
-          { value: 'breakfast', label: 'Desayuno', icon: '🌅' },
-          { value: 'lunch',     label: 'Almuerzo', icon: '☀️' },
-          { value: 'dinner',    label: 'Cena',     icon: '🌙' },
-          { value: 'snack',     label: 'Merienda', icon: '🍎' }
-        ]; track option.value) {
-          <button
-            type="button"
-            (click)="mealType.set($any(option.value))"
-            [class]="mealType() === option.value
-              ? 'flex flex-col items-center gap-1 p-3 rounded-xl border-2 border-primary-500 bg-primary-50 text-primary-700 cursor-pointer'
-              : 'flex flex-col items-center gap-1 p-3 rounded-xl border-2 border-gray-200 text-gray-500 hover:border-gray-300 transition-colors cursor-pointer'"
-          >
-            <span class="text-xl">{{ option.icon }}</span>
-            <span class="text-xs font-medium">{{ option.label }}</span>
-          </button>
-        }
-      </div>
-    </div>
-
-    <!-- Error -->
-    @if (error()) {
-      <div class="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-4 text-sm">
-        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-        </svg>
-        {{ error() }}
-      </div>
-    }
-
-    <!-- Analyze button -->
-    <button
-      (click)="analyzeImage()"
-      [disabled]="!selectedImage() || isAnalyzing()"
-      class="w-full py-3.5 rounded-xl font-semibold text-primary-contrast transition-all bg-primary-500 hover:bg-primary-600 active:scale-95 cursor-pointer disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:scale-100"
-    >
-      Analizar con IA
-    </button>
-
   </div>
 </div>
 
@@ -93,9 +124,18 @@
 @if (isAnalyzing()) {
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
     <div class="w-full max-w-sm bg-white rounded-2xl shadow-xl px-6 py-7 text-center">
-      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-50">
+      <div
+        class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-50"
+      >
         <svg class="h-8 w-8 animate-spin text-primary-600" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
         </svg>
       </div>
@@ -124,15 +164,22 @@
           <h2 class="text-lg font-bold text-gray-900">{{ result.name }}</h2>
           <p class="text-xs text-gray-400 mt-0.5">Resultado del análisis IA</p>
         </div>
-        <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors p-1 cursor-pointer">
+        <button
+          (click)="closeModal()"
+          class="text-gray-400 hover:text-gray-600 transition-colors p-1 cursor-pointer"
+        >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
 
       <div class="px-6 py-5 space-y-5">
-
         <!-- Calorías -->
         <div class="flex items-center justify-center bg-primary-50 rounded-xl py-4">
           <span class="text-5xl font-bold text-primary-600">{{ result.calories }}</span>
@@ -179,7 +226,9 @@
         <!-- Micronutrientes -->
         @if (result.micronutrients) {
           <div class="bg-gray-50 rounded-xl p-4">
-            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Micronutrientes</p>
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+              Micronutrientes
+            </p>
             <p class="text-sm text-gray-600 leading-relaxed">{{ result.micronutrients }}</p>
           </div>
         }
@@ -207,18 +256,27 @@
 
 <!-- Modal de guardado -->
 @if (isSaving()) {
-  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+  <div
+    class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+  >
     <div class="w-full max-w-sm bg-white rounded-2xl shadow-xl px-6 py-7 text-center">
-      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-50">
+      <div
+        class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-50"
+      >
         <svg class="h-8 w-8 animate-spin text-primary-600" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
         </svg>
       </div>
       <h2 class="text-lg font-semibold text-gray-900">Guardando comida</h2>
-      <p class="mt-2 text-sm text-gray-500">
-        Estamos registrando tu comida en el sistema.
-      </p>
+      <p class="mt-2 text-sm text-gray-500">Estamos registrando tu comida en el sistema.</p>
     </div>
   </div>
 }

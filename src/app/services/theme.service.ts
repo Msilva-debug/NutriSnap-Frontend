@@ -16,7 +16,7 @@ interface RgbColor {
 
 const themeShades: ThemeShade[] = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
 
-const defaultTheme: AppTheme = {
+export const DEFAULT_THEME: AppTheme = {
   primaryColor: '#6d28d9',
   secondaryColor: '#ecfeff',
 };
@@ -29,37 +29,13 @@ export class ThemeService {
   private readonly selectedTheme = signal<AppTheme>(this.getStoredTheme());
 
   readonly theme = computed(() => this.selectedTheme());
-  readonly selectedPrimaryColor = computed(() => this.theme().primaryColor);
-  readonly selectedSecondaryColor = computed(() => this.theme().secondaryColor);
-  readonly selectedPrimaryContrast = computed(() => getContrastColor(this.theme().primaryColor));
 
   constructor() {
     this.applyTailwindTheme(this.theme());
   }
 
-  setPrimaryColor(color: string): void {
-    this.updateColor('primaryColor', color);
-  }
-
-  setSecondaryColor(color: string): void {
-    this.updateColor('secondaryColor', color);
-  }
-
-  private updateColor(key: keyof AppTheme, color: string): void {
-    const normalizedColor = normalizeHexColor(color);
-    if (!normalizedColor) return;
-
-    this.selectedTheme.update((theme) => ({
-      ...theme,
-      [key]: normalizedColor,
-    }));
-  }
-
   applyUserTheme(theme: Partial<AppTheme>): void {
-    const nextTheme = {
-      primaryColor: normalizeHexColor(theme.primaryColor) ?? defaultTheme.primaryColor,
-      secondaryColor: normalizeHexColor(theme.secondaryColor) ?? defaultTheme.secondaryColor,
-    };
+    const nextTheme = normalizeTheme(theme);
 
     this.selectedTheme.set(nextTheme);
     this.persistTheme(nextTheme);
@@ -67,9 +43,9 @@ export class ThemeService {
   }
 
   resetTheme(): void {
-    this.selectedTheme.set(defaultTheme);
+    this.selectedTheme.set(DEFAULT_THEME);
     this.removeStoredTheme();
-    this.applyTailwindTheme(defaultTheme);
+    this.applyTailwindTheme(DEFAULT_THEME);
   }
 
   private applyTailwindTheme(theme: AppTheme): void {
@@ -93,21 +69,18 @@ export class ThemeService {
   }
 
   private getStoredTheme(): AppTheme {
-    if (typeof localStorage === 'undefined') return defaultTheme;
+    if (typeof localStorage === 'undefined') return DEFAULT_THEME;
 
     const storedTheme = localStorage.getItem(this.storageKey);
-    if (!storedTheme) return defaultTheme;
+    if (!storedTheme) return DEFAULT_THEME;
 
     try {
       const parsed = JSON.parse(storedTheme) as Partial<AppTheme>;
 
-      return {
-        primaryColor: normalizeHexColor(parsed.primaryColor) ?? defaultTheme.primaryColor,
-        secondaryColor: normalizeHexColor(parsed.secondaryColor) ?? defaultTheme.secondaryColor,
-      };
+      return normalizeTheme(parsed);
     } catch {
       this.removeStoredTheme();
-      return defaultTheme;
+      return DEFAULT_THEME;
     }
   }
 
@@ -141,8 +114,18 @@ export function normalizeHexColor(value: unknown): string | null {
   return null;
 }
 
+export function normalizeTheme(
+  theme: Partial<AppTheme>,
+  fallbackTheme: AppTheme = DEFAULT_THEME,
+): AppTheme {
+  return {
+    primaryColor: normalizeHexColor(theme.primaryColor) ?? fallbackTheme.primaryColor,
+    secondaryColor: normalizeHexColor(theme.secondaryColor) ?? fallbackTheme.secondaryColor,
+  };
+}
+
 function createThemeScale(color: string): ThemeScale {
-  const hex = normalizeHexColor(color) ?? defaultTheme.primaryColor;
+  const hex = normalizeHexColor(color) ?? DEFAULT_THEME.primaryColor;
   const rgb = hexToRgb(hex);
 
   return {
@@ -170,7 +153,7 @@ export function getContrastColor(hex: string): string {
 }
 
 function hexToRgb(hex: string): RgbColor {
-  const normalizedHex = normalizeHexColor(hex) ?? defaultTheme.primaryColor;
+  const normalizedHex = normalizeHexColor(hex) ?? DEFAULT_THEME.primaryColor;
   const numericValue = Number.parseInt(normalizedHex.slice(1), 16);
 
   return {

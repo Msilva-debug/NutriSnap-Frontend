@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { AppTheme, normalizeHexColor } from './theme.service';
+import { AppTheme, normalizeTheme } from './theme.service';
 import { AuthService } from './auth.service';
 
 export interface CreateUserRequest {
@@ -112,10 +112,7 @@ export class UserService {
   private parseUpdateThemeResponse(response: UpdateThemeResponse, fallbackTheme: AppTheme): AppTheme {
     const theme = 'user' in response && response.user ? response.user : response;
 
-    return {
-      primaryColor: normalizeHexColor(theme.primaryColor) ?? fallbackTheme.primaryColor,
-      secondaryColor: normalizeHexColor(theme.secondaryColor) ?? fallbackTheme.secondaryColor,
-    };
+    return normalizeTheme(theme, fallbackTheme);
   }
 
   private getAuthHeaders(): { Authorization: string } | undefined {

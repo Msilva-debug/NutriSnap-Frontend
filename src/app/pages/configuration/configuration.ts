@@ -1,61 +1,47 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { finalize } from 'rxjs';
-import { ThemeColorPicker } from '../../components/theme-color-picker/theme-color-picker';
-import { getContrastColor, normalizeHexColor, ThemeService } from '../../services/theme.service';
+import { ThemeCustomizer } from '../../components/theme-customizer/theme-customizer';
+import { AppTheme, normalizeTheme, ThemeService } from '../../services/theme.service';
 import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-configuration',
-  imports: [ThemeColorPicker],
+  imports: [ThemeCustomizer],
   templateUrl: './configuration.html',
   styles: ``,
 })
 export class Configuration {
   private readonly userService = inject(UserService);
-  readonly themeService = inject(ThemeService);
+  private readonly themeService = inject(ThemeService);
 
-  readonly primaryColor = signal(this.themeService.theme().primaryColor);
-  readonly secondaryColor = signal(this.themeService.theme().secondaryColor);
+  readonly themeDraft = signal<AppTheme>(this.themeService.theme());
   readonly saving = signal(false);
   readonly successMsg = signal('');
   readonly errorMsg = signal('');
 
-  readonly primaryContrast = computed(() => getContrastColor(this.primaryColor()));
-  readonly secondaryContrast = computed(() => getContrastColor(this.secondaryColor()));
   readonly hasChanges = computed(() => {
-    const theme = this.themeService.theme();
+    const savedTheme = normalizeTheme(this.themeService.theme());
+    const draftTheme = normalizeTheme(this.themeDraft());
 
     return (
-      normalizeHexColor(this.primaryColor()) !== normalizeHexColor(theme.primaryColor) ||
-      normalizeHexColor(this.secondaryColor()) !== normalizeHexColor(theme.secondaryColor)
+      draftTheme.primaryColor !== savedTheme.primaryColor ||
+      draftTheme.secondaryColor !== savedTheme.secondaryColor
     );
   });
 
-  selectPrimaryColor(color: string): void {
-    this.primaryColor.set(color);
-    this.clearMessages();
-  }
-
-  selectSecondaryColor(color: string): void {
-    this.secondaryColor.set(color);
+  updateThemeDraft(theme: AppTheme): void {
+    this.themeDraft.set(theme);
     this.clearMessages();
   }
 
   restoreCurrentTheme(): void {
-    const theme = this.themeService.theme();
-
-    this.primaryColor.set(theme.primaryColor);
-    this.secondaryColor.set(theme.secondaryColor);
+    this.themeDraft.set(this.themeService.theme());
     this.clearMessages();
   }
 
   saveTheme(): void {
-    const theme = {
-      primaryColor: normalizeHexColor(this.primaryColor()) ?? this.themeService.theme().primaryColor,
-      secondaryColor:
-        normalizeHexColor(this.secondaryColor()) ?? this.themeService.theme().secondaryColor,
-    };
+    const theme = normalizeTheme(this.themeDraft(), this.themeService.theme());
 
     this.saving.set(true);
     this.clearMessages();
@@ -66,8 +52,7 @@ export class Configuration {
       .subscribe({
         next: (savedTheme) => {
           this.themeService.applyUserTheme(savedTheme);
-          this.primaryColor.set(savedTheme.primaryColor);
-          this.secondaryColor.set(savedTheme.secondaryColor);
+          this.themeDraft.set(savedTheme);
           this.successMsg.set('Colores guardados correctamente.');
         },
         error: (error: HttpErrorResponse) => {
