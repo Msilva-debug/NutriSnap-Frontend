@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable, Subject, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AppStore } from '../store/app.store';
+import { ThemeService } from './theme.service';
 
 export interface LoginRequest {
   email: string;
@@ -11,6 +12,12 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   access_token: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  user?: {
+    primaryColor?: string;
+    secondaryColor?: string;
+  };
 }
 
 @Injectable({
@@ -26,12 +33,14 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private appStore: AppStore,
+    private themeService: ThemeService,
   ) {}
 
   login(loginDto: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.authUrl}/login`, loginDto).pipe(
       tap((response) => {
         localStorage.setItem(this.tokenKey, response.access_token);
+        this.applyThemeFromLoginResponse(response);
       }),
     );
   }
@@ -46,6 +55,7 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
+    this.themeService.resetTheme();
     this.appStore.dispatch({ type: 'auth/logout' });
     this.logoutSubject.next();
   }
@@ -58,5 +68,12 @@ export class AuthService {
     const expiresAt = payload.exp * 1000;
 
     return Date.now() >= expiresAt;
+  }
+
+  private applyThemeFromLoginResponse(response: LoginResponse): void {
+    this.themeService.applyUserTheme({
+      primaryColor: response.primaryColor ?? response.user?.primaryColor,
+      secondaryColor: response.secondaryColor ?? response.user?.secondaryColor,
+    });
   }
 }

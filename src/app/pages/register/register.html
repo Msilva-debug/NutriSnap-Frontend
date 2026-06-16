@@ -21,7 +21,7 @@
       <div class="flex items-center gap-2">
         <div
           class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-          [class]="step() >= 1 ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-500'"
+          [class]="step() >= 1 ? 'bg-primary-500 text-primary-contrast' : 'bg-gray-200 text-gray-500'"
         >
           1
         </div>
@@ -35,7 +35,7 @@
       <div class="flex items-center gap-2">
         <div
           class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-          [class]="step() >= 2 ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-500'"
+          [class]="step() >= 2 ? 'bg-primary-500 text-primary-contrast' : 'bg-gray-200 text-gray-500'"
         >
           2
         </div>
@@ -128,7 +128,7 @@
             type="button"
             (click)="goToStep2()"
             [disabled]="email.pending"
-            class="w-full py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition shadow-md cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+            class="w-full py-3 bg-primary-500 hover:bg-primary-600 text-primary-contrast font-semibold rounded-xl transition shadow-md cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
           >
             @if (email.pending) {
               Validando...
@@ -387,7 +387,7 @@
             <button
               type="submit"
               [disabled]="loading()"
-              class="flex-1 py-3 bg-primary-500 hover:bg-primary-600 disabled:opacity-60 text-white font-semibold rounded-xl transition shadow-md cursor-pointer"
+              class="flex-1 py-3 bg-primary-500 hover:bg-primary-600 disabled:opacity-60 text-primary-contrast font-semibold rounded-xl transition shadow-md cursor-pointer"
             >
               @if (loading()) {
                 <span class="inline-flex items-center justify-center gap-2">

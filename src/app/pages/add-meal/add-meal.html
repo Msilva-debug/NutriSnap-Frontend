@@ -81,7 +81,7 @@
     <button
       (click)="analyzeImage()"
       [disabled]="!selectedImage() || isAnalyzing()"
-      class="w-full py-3.5 rounded-xl font-semibold text-white transition-all bg-primary-500 hover:bg-primary-600 active:scale-95 cursor-pointer disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:scale-100"
+      class="w-full py-3.5 rounded-xl font-semibold text-primary-contrast transition-all bg-primary-500 hover:bg-primary-600 active:scale-95 cursor-pointer disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:scale-100"
     >
       Analizar con IA
     </button>
@@ -196,7 +196,7 @@
         <button
           (click)="saveMeal()"
           [disabled]="isSaving()"
-          class="flex-1 py-3 rounded-xl bg-primary-500 hover:bg-primary-600 disabled:bg-gray-200 disabled:text-gray-400 cursor-pointer disabled:cursor-not-allowed text-white font-semibold active:scale-95 disabled:scale-100 transition-all text-sm"
+          class="flex-1 py-3 rounded-xl bg-primary-500 hover:bg-primary-600 disabled:bg-gray-200 disabled:text-gray-400 cursor-pointer disabled:cursor-not-allowed text-primary-contrast font-semibold active:scale-95 disabled:scale-100 transition-all text-sm"
         >
           Guardar comida
         </button>
