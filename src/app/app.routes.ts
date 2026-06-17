@@ -6,39 +6,25 @@ export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   {
     path: 'login',
-    loadComponent: () =>
-      import('./pages/login/login').then((m) => m.Login),
+    loadComponent: () => import('./pages/login/login').then((m) => m.Login),
   },
   {
     path: 'register',
-    loadComponent: () =>
-      import('./pages/register/register').then((m) => m.Register),
+    loadComponent: () => import('./pages/register/register').then((m) => m.Register),
   },
   {
     path: '',
     component: MainLayout,
-    canActivate:[authGuard],
+    canActivate: [authGuard],
     canActivateChild: [authGuard],
     children: [
       {
         path: 'dashboard',
-        loadComponent: () =>
-          import('./pages/dashboard/dashboard').then((m) => m.Dashboard),
+        loadComponent: () => import('./pages/dashboard/dashboard').then((m) => m.Dashboard),
       },
       {
         path: 'meals',
-        children: [
-          {
-            path: 'add',
-            loadComponent: () =>
-              import('./pages/add-meal/add-meal').then((m) => m.AddMeal),
-          },
-          {
-            path: 'history',
-            loadComponent: () =>
-              import('./pages/meal-history/meal-history').then((m) => m.MealHistory),
-          },
-        ],
+        loadChildren: () => import('./pages/meals/meals.routes').then((m) => m.mealsRoutes),
       },
       {
         path: 'recommendations',

@@ -4,9 +4,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { NutritionAnalysisService } from './services/nutrition-analysis.service';
-import { FoodAnalysisResult } from '../../models/meal.model';
-import { CreateMealRequest, MealService } from '../../services/meal.service';
-import { MealStateService } from '../../services/meal-state.service';
+import { FoodAnalysisResult } from '../../../models/meal.model';
+import { CreateMealRequest, MealService } from '../../../services/meal.service';
+import { MealStateService } from '../../../services/meal-state.service';
 
 @Component({
   selector: 'app-add-meal',

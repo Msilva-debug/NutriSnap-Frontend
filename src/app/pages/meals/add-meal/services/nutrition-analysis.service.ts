@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { FoodAnalysisResult } from '../../../models/meal.model';
-import { environment } from '../../../../environments/environment';
+import { FoodAnalysisResult } from '../../../../models/meal.model';
+import { environment } from '../../../../../environments/environment';
 
 export interface ActivityLevel {
   id: number;

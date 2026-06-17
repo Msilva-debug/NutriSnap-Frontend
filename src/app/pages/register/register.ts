@@ -14,7 +14,7 @@ import { Observable, catchError, finalize, map, of, switchMap, timer } from 'rxj
 import {
   ActivityLevel,
   NutritionAnalysisService,
-} from '../add-meal/services/nutrition-analysis.service';
+} from '../meals/add-meal/services/nutrition-analysis.service';
 import { RabbitIcon } from '../../components/rabbit-icon/rabbit-icon';
 import { ThemeCustomizer } from '../../components/theme-customizer/theme-customizer';
 import { CreateUserRequest, UserService } from '../../services/user.service';

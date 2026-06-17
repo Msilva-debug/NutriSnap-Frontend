@@ -37,6 +37,13 @@ export class MealService {
     });
   }
 
+  findByDate(date: string): Observable<Meal[]> {
+    return this.http.get<Meal[]>(`${this.mealUrl}/history`, {
+      params: { date },
+      headers: this.getAuthHeaders(),
+    });
+  }
+
   deleteMeal(mealId: string): Observable<unknown> {
     return this.http.delete(`${this.mealUrl}/${mealId}`, {
       headers: this.getAuthHeaders(),

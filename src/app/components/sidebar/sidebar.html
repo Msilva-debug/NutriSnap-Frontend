@@ -40,25 +40,60 @@
       Panel
     </a>
 
-    <a
-      routerLink="/meals/add"
-      routerLinkActive="bg-primary-600"
-      (click)="close()"
-      class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary-600 transition font-medium"
-    >
-      <span>➕</span>
-      Agregar comida
-    </a>
+    <div routerLinkActive="is-active" #mealsActive="routerLinkActive">
+      <button
+        type="button"
+        (click)="toggleMealsMenu()"
+        class="flex w-full items-center justify-between gap-3 rounded-lg px-4 py-3 font-medium transition hover:bg-primary-600"
+        [class.bg-primary-600]="mealsMenuOpen() || mealsActive.isActive"
+        aria-label="Abrir menú de comidas"
+        [attr.aria-expanded]="mealsMenuOpen() || mealsActive.isActive"
+      >
+        <span class="flex items-center gap-3">
+          <span>🍽️</span>
+          Comidas
+        </span>
+        <svg
+          class="h-4 w-4 transition-transform"
+          [class.rotate-180]="mealsMenuOpen() || mealsActive.isActive"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
 
-    <!-- <a
-      routerLink="/meals/history"
-      routerLinkActive="bg-primary-600"
-      (click)="close()"
-      class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary-600 transition font-medium"
-    >
-      <span>📋</span>
-      Historial
-    </a> -->
+      @if (mealsMenuOpen() || mealsActive.isActive) {
+        <div class="mt-2 space-y-1 pl-8">
+          <a
+            routerLink="/meals/add"
+            routerLinkActive="bg-primary-600 text-white"
+            (click)="close()"
+            class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-primary-100 transition hover:bg-primary-600 hover:text-white"
+          >
+            <span>➕</span>
+            Agregar comida
+          </a>
+
+          <a
+            routerLink="/meals/history"
+            routerLinkActive="bg-primary-600 text-white"
+            (click)="close()"
+            class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-primary-100 transition hover:bg-primary-600 hover:text-white"
+          >
+            <span>📋</span>
+            Historial de comidas
+          </a>
+        </div>
+      }
+    </div>
 
     <a
       routerLink="/recommendations"

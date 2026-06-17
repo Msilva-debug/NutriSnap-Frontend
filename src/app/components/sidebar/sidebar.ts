@@ -1,4 +1,4 @@
-import { Component, output } from '@angular/core';
+import { Component, output, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { RabbitIcon } from '../rabbit-icon/rabbit-icon';
 import { AuthService } from '../../services/auth.service';
@@ -11,6 +11,7 @@ import { AuthService } from '../../services/auth.service';
 })
 export class Sidebar {
   closeRequested = output<void>();
+  mealsMenuOpen = signal(false);
 
   constructor(
     private router: Router,
@@ -19,6 +20,10 @@ export class Sidebar {
 
   close(): void {
     this.closeRequested.emit();
+  }
+
+  toggleMealsMenu(): void {
+    this.mealsMenuOpen.update((isOpen) => !isOpen);
   }
 
   logout(): void {

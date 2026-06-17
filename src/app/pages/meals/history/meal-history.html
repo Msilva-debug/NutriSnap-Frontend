@@ -1,0 +1,193 @@
+<div class="min-h-screen bg-gray-50 p-4 md:p-6">
+  <div class="mx-auto max-w-6xl space-y-6">
+    <header class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-800">Historial de comidas</h1>
+        <p class="mt-1 capitalize text-gray-500">{{ selectedDateLabel() }}</p>
+      </div>
+
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-end">
+        <label class="block">
+          <span class="mb-1 block text-xs font-semibold uppercase text-gray-400">Fecha</span>
+          <input
+            type="date"
+            class="h-10 rounded-xl border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 outline-none transition focus:ring-2 focus:ring-primary-400"
+            [value]="selectedDate()"
+            [max]="todayInputDate"
+            (change)="changeDate($event)"
+          />
+        </label>
+
+        <button
+          type="button"
+          (click)="selectToday()"
+          [disabled]="isTodaySelected() || isLoadingMeals()"
+          class="inline-flex h-10 items-center justify-center rounded-xl border border-gray-200 bg-white px-4 text-sm font-bold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          Hoy
+        </button>
+
+        <button
+          type="button"
+          (click)="refreshMeals()"
+          [disabled]="isLoadingMeals()"
+          class="inline-flex h-10 items-center justify-center rounded-xl border border-gray-200 bg-white px-4 text-sm font-bold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          Actualizar
+        </button>
+        <a
+          routerLink="/meals/add"
+          class="inline-flex h-10 items-center justify-center rounded-xl bg-primary-500 px-4 text-sm font-bold text-primary-contrast shadow-md transition hover:bg-primary-600"
+        >
+          Agregar comida
+        </a>
+      </div>
+    </header>
+
+    <section class="grid gap-4 md:grid-cols-4">
+      <div class="rounded-xl bg-white p-5 shadow-md">
+        <p class="text-xs font-semibold uppercase text-gray-400">Comidas</p>
+        <p class="mt-2 text-3xl font-bold text-gray-800">{{ totalMeals }}</p>
+      </div>
+
+      <div class="rounded-xl bg-white p-5 shadow-md">
+        <p class="text-xs font-semibold uppercase text-gray-400">Calorías</p>
+        <p class="mt-2 text-3xl font-bold text-gray-800">{{ totalCalories }}</p>
+        <p class="mt-1 text-xs text-gray-400">kcal registradas</p>
+      </div>
+
+      <div class="rounded-xl bg-white p-5 shadow-md">
+        <p class="text-xs font-semibold uppercase text-gray-400">Proteínas</p>
+        <p class="mt-2 text-3xl font-bold text-gray-800">{{ totalProteins }}g</p>
+      </div>
+
+      <div class="rounded-xl bg-white p-5 shadow-md">
+        <p class="text-xs font-semibold uppercase text-gray-400">Macros</p>
+        <p class="mt-2 text-sm font-semibold text-gray-700">
+          {{ totalCarbs }}g carbos · {{ totalFats }}g grasas
+        </p>
+      </div>
+    </section>
+
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <section class="rounded-xl bg-white p-5 shadow-md md:p-6">
+        <div class="mb-5 flex items-center justify-between gap-3">
+          <div>
+            <h2 class="text-lg font-bold text-gray-800">Registros de la fecha</h2>
+            <p class="mt-1 capitalize text-sm text-gray-500">{{ selectedDateLabel() }}</p>
+          </div>
+        </div>
+
+        @if (isLoadingMeals()) {
+          <div class="flex flex-col items-center justify-center py-14 text-gray-500">
+            <svg class="mb-4 h-8 w-8 animate-spin text-primary-500" fill="none" viewBox="0 0 24 24">
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+            </svg>
+            <p>Cargando historial de comidas...</p>
+          </div>
+        } @else if (mealsError()) {
+          <div class="rounded-xl bg-red-50 px-4 py-5 text-center">
+            <p class="text-sm font-medium text-red-600">{{ mealsError() }}</p>
+            <button
+              type="button"
+              (click)="refreshMeals()"
+              class="mt-4 rounded-lg bg-primary-500 px-4 py-2 text-sm font-bold text-primary-contrast transition hover:bg-primary-600"
+            >
+              Reintentar
+            </button>
+          </div>
+        } @else if (meals().length === 0) {
+          <div class="rounded-xl border border-dashed border-gray-200 px-4 py-14 text-center">
+            <p class="text-lg font-bold text-gray-700">Aún no hay comidas registradas</p>
+            <p class="mt-2 text-sm text-gray-500">
+              No encontramos comidas para la fecha seleccionada.
+            </p>
+            @if (isTodaySelected()) {
+              <a
+                routerLink="/meals/add"
+                class="mt-5 inline-flex rounded-xl bg-primary-500 px-5 py-2.5 text-sm font-bold text-primary-contrast transition hover:bg-primary-600"
+              >
+                Agregar comida
+              </a>
+            }
+          </div>
+        } @else {
+          <div class="divide-y divide-gray-100">
+            @for (meal of meals(); track meal.id ?? $index) {
+              <article
+                class="flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div class="min-w-0">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-lg">{{ getMealTypeIcon(meal.type) }}</span>
+                    <h3 class="truncate text-base font-bold text-gray-800">{{ meal.name }}</h3>
+                    <span
+                      class="rounded-full bg-primary-50 px-2.5 py-1 text-xs font-bold text-primary-700"
+                    >
+                      {{ getMealTypeLabel(meal.type) }}
+                    </span>
+                  </div>
+                  <div
+                    class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500"
+                  >
+                    <span>{{ getMealDate(meal) }}</span>
+                    <span>{{ getMealTime(meal) }}</span>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-4 gap-2 text-center sm:min-w-[320px]">
+                  <div>
+                    <p class="text-xs text-gray-400">kcal</p>
+                    <p class="font-bold text-gray-800">{{ getMealCalories(meal) }}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-400">Prot</p>
+                    <p class="font-bold text-gray-800">{{ getMealMacro(meal.proteins) }}g</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-400">Carb</p>
+                    <p class="font-bold text-gray-800">{{ getMealMacro(meal.carbs) }}g</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-400">Grasa</p>
+                    <p class="font-bold text-gray-800">{{ getMealMacro(meal.fats) }}g</p>
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        }
+      </section>
+
+      <aside class="rounded-xl bg-white p-5 shadow-md md:p-6">
+        <h2 class="text-lg font-bold text-gray-800">Por tipo de comida</h2>
+        <div class="mt-5 space-y-4">
+          @for (summary of mealTypeSummaries; track summary.type) {
+            <div class="rounded-xl border border-gray-100 p-4">
+              <div class="flex items-center justify-between gap-3">
+                <div class="flex min-w-0 items-center gap-3">
+                  <span class="text-xl">{{ summary.icon }}</span>
+                  <div class="min-w-0">
+                    <p class="truncate text-sm font-bold text-gray-800">{{ summary.label }}</p>
+                    <p class="text-xs text-gray-400">{{ summary.meals }} comidas</p>
+                  </div>
+                </div>
+                <p class="shrink-0 text-sm font-bold text-primary-600">
+                  {{ summary.calories }} kcal
+                </p>
+              </div>
+            </div>
+          }
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
