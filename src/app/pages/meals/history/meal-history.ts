@@ -5,6 +5,11 @@ import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { Meal } from '../../../models/meal.model';
 import { MealService } from '../../../services/meal.service';
+import {
+  getMealTypeIcon,
+  getMealTypeLabel,
+  MEAL_TYPE_OPTIONS,
+} from '../../../utils/meal-types.util';
 
 interface MealTypeSummary {
   type: Meal['type'];
@@ -31,13 +36,6 @@ export class MealHistory implements OnInit {
   readonly selectedDateLabel = computed(() => this.formatInputDate(this.selectedDate(), 'long'));
   readonly isTodaySelected = computed(() => this.selectedDate() === this.todayInputDate);
 
-  private readonly mealTypeMeta: Record<Meal['type'], { label: string; icon: string }> = {
-    breakfast: { label: 'Desayuno', icon: '🌅' },
-    lunch: { label: 'Almuerzo', icon: '☀️' },
-    dinner: { label: 'Cena', icon: '🌙' },
-    snack: { label: 'Merienda', icon: '🍎' },
-  };
-
   ngOnInit(): void {
     this.loadMealsByDate();
   }
@@ -63,14 +61,13 @@ export class MealHistory implements OnInit {
   }
 
   get mealTypeSummaries(): MealTypeSummary[] {
-    return (Object.keys(this.mealTypeMeta) as Meal['type'][]).map((type) => {
-      const meals = this.meals().filter((meal) => meal.type === type);
-      const meta = this.mealTypeMeta[type];
+    return MEAL_TYPE_OPTIONS.map((option) => {
+      const meals = this.meals().filter((meal) => meal.type === option.value);
 
       return {
-        type,
-        label: meta.label,
-        icon: meta.icon,
+        type: option.value,
+        label: option.label,
+        icon: option.icon,
         meals: meals.length,
         calories: meals.reduce((sum, meal) => sum + this.getMealCalories(meal), 0),
       };
@@ -97,11 +94,11 @@ export class MealHistory implements OnInit {
   }
 
   getMealTypeLabel(type: Meal['type']): string {
-    return this.mealTypeMeta[type].label;
+    return getMealTypeLabel(type);
   }
 
   getMealTypeIcon(type: Meal['type']): string {
-    return this.mealTypeMeta[type].icon;
+    return getMealTypeIcon(type);
   }
 
   getMealTime(meal: Meal): string {

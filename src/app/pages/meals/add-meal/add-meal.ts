@@ -7,6 +7,7 @@ import { NutritionAnalysisService } from './services/nutrition-analysis.service'
 import { FoodAnalysisResult } from '../../../models/meal.model';
 import { CreateMealRequest, MealService } from '../../../services/meal.service';
 import { MealStateService } from '../../../services/meal-state.service';
+import { MEAL_TYPE_OPTIONS, MealType } from '../../../utils/meal-types.util';
 
 @Component({
   selector: 'app-add-meal',
@@ -21,8 +22,9 @@ export class AddMeal {
   isSaving = signal(false);
   analysisResult = signal<FoodAnalysisResult | null>(null);
   showModal = signal(false);
-  mealType = signal<'breakfast' | 'lunch' | 'dinner' | 'snack'>('lunch');
+  mealType = signal<MealType>('lunch');
   error = signal<string | null>(null);
+  readonly mealTypeOptions = MEAL_TYPE_OPTIONS;
 
   constructor(
     private nutritionService: NutritionAnalysisService,

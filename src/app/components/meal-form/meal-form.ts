@@ -2,6 +2,7 @@ import { Component, signal, output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Meal } from '../../models/meal.model';
+import { MEAL_TYPE_OPTIONS } from '../../utils/meal-types.util';
 
 @Component({
   selector: 'app-meal-form',
@@ -13,6 +14,7 @@ export class MealForm {
   form: FormGroup;
   loading = signal(false);
   mealAdded = output<Meal>();
+  readonly mealTypeOptions = MEAL_TYPE_OPTIONS;
 
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({

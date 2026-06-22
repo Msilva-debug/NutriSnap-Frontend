@@ -8,6 +8,7 @@ import { NutrientOverageAlert } from '../../components/nutrient-overage-alert/nu
 import { Meal } from '../../models/meal.model';
 import { MealStateService } from '../../services/meal-state.service';
 import { NutritionPlanStateService } from '../../services/nutrition-plan-state.service';
+import { getMealTypeLabel, MEAL_TYPE_OPTIONS } from '../../utils/meal-types.util';
 
 interface MacroStat {
   label: string;
@@ -39,6 +40,7 @@ export class Dashboard implements OnInit {
   readonly mealsError = this.mealState.todayMealsError;
   deletingMealIds = signal<Set<string>>(new Set());
   mealActionError = signal<string | null>(null);
+  readonly mealTypeOptions = MEAL_TYPE_OPTIONS;
 
   todayDate = signal(new Date().toLocaleDateString('es-ES', {
     weekday: 'long',
@@ -48,12 +50,6 @@ export class Dashboard implements OnInit {
   }));
 
   private readonly fallbackCalorieGoal = 2000;
-  private readonly mealTypeLabels: Record<Meal['type'], string> = {
-    breakfast: 'Desayuno',
-    lunch: 'Almuerzo',
-    dinner: 'Cena',
-    snack: 'Merienda',
-  };
 
   ngOnInit(): void {
     forkJoin([
@@ -135,12 +131,14 @@ export class Dashboard implements OnInit {
   }
 
   get mealsByType() {
-    const types: { [key: string]: Meal[] } = {
-      breakfast: [],
-      lunch: [],
-      dinner: [],
-      snack: [],
-    };
+    const types = MEAL_TYPE_OPTIONS.reduce(
+      (groupedMeals, option) => {
+        groupedMeals[option.value] = [];
+        return groupedMeals;
+      },
+      {} as Record<Meal['type'], Meal[]>,
+    );
+
     this.meals().forEach(meal => {
       types[meal.type]?.push(meal);
     });
@@ -190,7 +188,7 @@ export class Dashboard implements OnInit {
   }
 
   getMealTypeLabel(type: Meal['type']): string {
-    return this.mealTypeLabels[type];
+    return getMealTypeLabel(type);
   }
 
   getMealMacroDetails(meal: Meal): MealMacroDetail[] {
