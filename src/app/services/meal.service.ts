@@ -14,6 +14,24 @@ export interface CreateMealRequest {
   fats?: number;
 }
 
+export interface SaveMealHistoryNoteRequest {
+  date: string;
+  note: string;
+}
+
+export interface MealHistoryResponse {
+  date: string;
+  meals: Meal[];
+  note: string | null;
+  noteId: number | null;
+}
+
+export interface SaveMealHistoryNoteResponse {
+  date?: string;
+  note?: string | null;
+  noteId?: number | null;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -37,8 +55,8 @@ export class MealService {
     });
   }
 
-  findByDate(date: string): Observable<Meal[]> {
-    return this.http.get<Meal[]>(`${this.mealUrl}/history`, {
+  findByDate(date: string): Observable<MealHistoryResponse> {
+    return this.http.get<MealHistoryResponse>(`${this.mealUrl}/history`, {
       params: { date },
       headers: this.getAuthHeaders(),
     });
@@ -46,6 +64,12 @@ export class MealService {
 
   deleteMeal(mealId: string): Observable<unknown> {
     return this.http.delete(`${this.mealUrl}/${mealId}`, {
+      headers: this.getAuthHeaders(),
+    });
+  }
+
+  saveHistoryNote(noteDto: SaveMealHistoryNoteRequest): Observable<SaveMealHistoryNoteResponse> {
+    return this.http.patch<SaveMealHistoryNoteResponse>(`${this.mealUrl}/history/note`, noteDto, {
       headers: this.getAuthHeaders(),
     });
   }

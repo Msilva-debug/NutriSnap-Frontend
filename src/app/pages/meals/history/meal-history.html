@@ -71,10 +71,28 @@
 
     <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
       <section class="rounded-xl bg-white p-5 shadow-md md:p-6">
-        <div class="mb-5 flex items-center justify-between gap-3">
+        <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 class="text-lg font-bold text-gray-800">Registros de la fecha</h2>
             <p class="mt-1 capitalize text-sm text-gray-500">{{ selectedDateLabel() }}</p>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <button
+              type="button"
+              (click)="openDayNoteModal()"
+              class="inline-flex h-10 items-center justify-center rounded-xl border border-gray-200 bg-white px-4 text-sm font-bold text-gray-600 transition hover:bg-gray-50"
+            >
+              {{ hasDayNote() ? 'Editar nota' : 'Nota del día' }}
+            </button>
+
+            <a
+              routerLink="/recommendations"
+              [queryParams]="{ date: selectedDate() }"
+              class="inline-flex h-10 items-center justify-center rounded-xl bg-primary-500 px-4 text-sm font-bold text-primary-contrast shadow-md transition hover:bg-primary-600"
+            >
+              Recomendaciones
+            </a>
           </div>
         </div>
 
@@ -120,7 +138,7 @@
             }
           </div>
         } @else {
-          <div class="divide-y divide-gray-100">
+          <div class="app-scrollbar max-h-64 divide-y divide-gray-100 overflow-y-auto pr-2 md:max-h-72">
             @for (meal of meals(); track meal.id ?? $index) {
               <article
                 class="flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between"
@@ -165,6 +183,15 @@
             }
           </div>
         }
+
+        @if (hasDayNote()) {
+          <div class="mt-5 rounded-xl border border-primary-100 bg-primary-50 px-4 py-3">
+            <p class="text-xs font-bold uppercase text-primary-600">Nota del día</p>
+            <p class="app-scrollbar mt-1 max-h-24 overflow-y-auto whitespace-pre-line break-words pr-2 text-sm leading-relaxed text-gray-700">
+              {{ dayNote() }}
+            </p>
+          </div>
+        }
       </section>
 
       <aside class="rounded-xl bg-white p-5 shadow-md md:p-6">
@@ -191,3 +218,89 @@
     </div>
   </div>
 </div>
+
+@if (isDayNoteModalOpen()) {
+  <div
+    class="fixed inset-0 z-50 flex items-end justify-center bg-gray-900/60 p-4 sm:items-center"
+    (click)="closeDayNoteModal()"
+  >
+    <div
+      class="w-full max-w-lg rounded-2xl bg-white shadow-2xl"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="day-note-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex items-start justify-between gap-4 border-b border-gray-100 p-5">
+        <div>
+          <h2 id="day-note-title" class="text-lg font-bold text-gray-900">Nota del día</h2>
+          <p class="mt-1 capitalize text-sm text-gray-500">{{ selectedDateLabel() }}</p>
+        </div>
+
+        <button
+          type="button"
+          (click)="closeDayNoteModal()"
+          [disabled]="isSavingDayNote()"
+          class="rounded-lg px-3 py-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+          aria-label="Cerrar nota del día"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="space-y-4 p-5">
+        <label class="block">
+          <span class="mb-2 block text-sm font-semibold text-gray-700">Nota personal</span>
+          <textarea
+            rows="5"
+            maxlength="500"
+            [value]="dayNoteDraft()"
+            (input)="dayNoteDraft.set($any($event.target).value)"
+            [disabled]="isSavingDayNote()"
+            class="app-scrollbar w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-700 outline-none transition focus:ring-2 focus:ring-primary-400"
+            placeholder="Ej: Me sentí con más energía después del almuerzo."
+          ></textarea>
+        </label>
+
+        <p class="text-right text-xs text-gray-400">{{ dayNoteDraft().length }}/500</p>
+
+        @if (dayNoteError()) {
+          <p class="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+            {{ dayNoteError() }}
+          </p>
+        }
+      </div>
+
+      <div class="flex flex-col-reverse gap-2 border-t border-gray-100 p-5 sm:flex-row sm:justify-end">
+        @if (hasDayNote()) {
+          <button
+            type="button"
+            (click)="deleteDayNote()"
+            [disabled]="isSavingDayNote()"
+            class="rounded-xl border border-red-100 px-4 py-2.5 text-sm font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Eliminar nota
+          </button>
+        }
+
+        <button
+          type="button"
+          (click)="closeDayNoteModal()"
+          [disabled]="isSavingDayNote()"
+          class="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-bold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          (click)="saveDayNote()"
+          [disabled]="isSavingDayNote()"
+          class="rounded-xl bg-primary-500 px-4 py-2.5 text-sm font-bold text-primary-contrast shadow-md transition hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {{ isSavingDayNote() ? 'Guardando...' : 'Guardar nota' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

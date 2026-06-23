@@ -24,31 +24,7 @@ import { AppTheme, ThemeService } from '../../services/theme.service';
   selector: 'app-register',
   imports: [ReactiveFormsModule, RouterLink, RabbitIcon, ThemeCustomizer],
   templateUrl: './register.html',
-  styles: `
-    .register-card-scroll {
-      scrollbar-color: var(--color-primary-400) var(--color-primary-50);
-      scrollbar-width: thin;
-    }
-
-    .register-card-scroll::-webkit-scrollbar {
-      width: 10px;
-    }
-
-    .register-card-scroll::-webkit-scrollbar-track {
-      background: var(--color-primary-50);
-      border-radius: 999px;
-    }
-
-    .register-card-scroll::-webkit-scrollbar-thumb {
-      background: var(--color-primary-400);
-      border: 2px solid var(--color-primary-50);
-      border-radius: 999px;
-    }
-
-    .register-card-scroll::-webkit-scrollbar-thumb:hover {
-      background: var(--color-primary-500);
-    }
-  `,
+  styles: ``,
 })
 export class Register implements OnInit {
   form: FormGroup;

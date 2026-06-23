@@ -2,8 +2,21 @@
   <div class="mx-auto max-w-6xl">
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-gray-800">💡 Recomendaciones</h1>
-      <p class="mt-1 text-gray-500">Ideas simples para mantener un buen ritmo nutricional.</p>
+      <p class="mt-1 text-gray-500">
+        @if (selectedDateLabel()) {
+          Recomendaciones para {{ selectedDateLabel() }}
+        } @else {
+          Ideas simples para mantener un buen ritmo nutricional.
+        }
+      </p>
     </div>
+
+    @if (selectedDateLabel()) {
+      <div class="mb-6 rounded-xl border border-primary-100 bg-primary-50 p-4">
+        <p class="text-xs font-bold uppercase text-primary-600">Fecha seleccionada</p>
+        <p class="mt-1 capitalize text-sm font-semibold text-gray-700">{{ selectedDateLabel() }}</p>
+      </div>
+    }
 
     <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
       <div class="rounded-xl bg-white p-5 shadow-md">

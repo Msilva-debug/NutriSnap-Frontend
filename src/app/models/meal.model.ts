@@ -3,9 +3,11 @@ export interface Meal {
   name: string;
   calories: number;
   time?: string;
+  date?: string;
   createdAt?: string;
   updatedAt?: string;
   type: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+  userId?: number;
   proteins?: number;
   carbs?: number;
   fats?: number;

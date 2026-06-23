@@ -4,7 +4,7 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { Meal } from '../../../models/meal.model';
-import { MealService } from '../../../services/meal.service';
+import { MealHistoryResponse, MealService } from '../../../services/meal.service';
 import {
   getMealTypeIcon,
   getMealTypeLabel,
@@ -32,9 +32,16 @@ export class MealHistory implements OnInit {
   readonly meals = signal<Meal[]>([]);
   readonly isLoadingMeals = signal(false);
   readonly mealsError = signal<string | null>(null);
+  readonly dayNote = signal('');
+  readonly dayNoteId = signal<number | null>(null);
+  readonly dayNoteDraft = signal('');
+  readonly isDayNoteModalOpen = signal(false);
+  readonly isSavingDayNote = signal(false);
+  readonly dayNoteError = signal<string | null>(null);
   readonly todayInputDate = this.getTodayInputDate();
   readonly selectedDateLabel = computed(() => this.formatInputDate(this.selectedDate(), 'long'));
   readonly isTodaySelected = computed(() => this.selectedDate() === this.todayInputDate);
+  readonly hasDayNote = computed(() => this.dayNote().trim().length > 0);
 
   ngOnInit(): void {
     this.loadMealsByDate();
@@ -93,6 +100,29 @@ export class MealHistory implements OnInit {
     this.loadMealsByDate();
   }
 
+  openDayNoteModal(): void {
+    this.dayNoteDraft.set(this.dayNote());
+    this.dayNoteError.set(null);
+    this.isDayNoteModalOpen.set(true);
+  }
+
+  closeDayNoteModal(): void {
+    if (this.isSavingDayNote()) return;
+
+    this.isDayNoteModalOpen.set(false);
+  }
+
+  saveDayNote(): void {
+    const note = this.dayNoteDraft().trim();
+
+    this.persistDayNoteInBackend(note);
+  }
+
+  deleteDayNote(): void {
+    this.dayNoteDraft.set('');
+    this.persistDayNoteInBackend('');
+  }
+
   getMealTypeLabel(type: Meal['type']): string {
     return getMealTypeLabel(type);
   }
@@ -115,17 +145,10 @@ export class MealHistory implements OnInit {
   }
 
   getMealDate(meal: Meal): string {
-    const dateValue = meal.createdAt ?? meal.updatedAt;
+    const dateValue = meal.date ?? meal.createdAt ?? meal.updatedAt;
     if (!dateValue) return this.selectedDateLabel();
 
-    const date = new Date(dateValue);
-    if (Number.isNaN(date.getTime())) return this.selectedDateLabel();
-
-    return date.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
+    return this.formatDateValue(dateValue, 'short');
   }
 
   getMealCalories(meal: Meal): number {
@@ -148,11 +171,12 @@ export class MealHistory implements OnInit {
       .findByDate(this.selectedDate())
       .pipe(finalize(() => this.isLoadingMeals.set(false)))
       .subscribe({
-        next: (meals) => {
-          this.meals.set(meals ?? []);
+        next: (history) => {
+          this.applyHistoryResponse(history);
         },
         error: (error: HttpErrorResponse) => {
           this.meals.set([]);
+          this.setDayNote(null, null);
           this.mealsError.set(this.getMealsErrorMessage(error));
         },
       });
@@ -170,6 +194,53 @@ export class MealHistory implements OnInit {
       : 'No se pudieron cargar las comidas de la fecha seleccionada.';
   }
 
+  private persistDayNoteInBackend(note: string): void {
+    const date = this.selectedDate();
+
+    this.isSavingDayNote.set(true);
+    this.dayNoteError.set(null);
+
+    this.mealService
+      .saveHistoryNote({ date, note })
+      .pipe(finalize(() => this.isSavingDayNote.set(false)))
+      .subscribe({
+        next: (savedNote) => {
+          const nextNote = savedNote.note ?? note;
+
+          this.setDayNote(nextNote, savedNote.noteId ?? (nextNote ? this.dayNoteId() : null));
+          this.isDayNoteModalOpen.set(false);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.dayNoteError.set(this.getDayNoteErrorMessage(error));
+        },
+      });
+  }
+
+  private getDayNoteErrorMessage(error: HttpErrorResponse): string {
+    const message = error.error?.message;
+
+    if (Array.isArray(message)) {
+      return message.join(' ');
+    }
+
+    return typeof message === 'string'
+      ? message
+      : 'No se pudo guardar la nota del día. Intenta nuevamente.';
+  }
+
+  private applyHistoryResponse(history: MealHistoryResponse | null): void {
+    this.meals.set(history?.meals ?? []);
+    this.setDayNote(history?.note ?? null, history?.noteId ?? null);
+  }
+
+  private setDayNote(note: string | null, noteId: number | null): void {
+    const nextNote = note ?? '';
+
+    this.dayNote.set(nextNote);
+    this.dayNoteId.set(noteId);
+    this.dayNoteDraft.set(nextNote);
+  }
+
   private getTodayInputDate(): string {
     const today = new Date();
     const month = `${today.getMonth() + 1}`.padStart(2, '0');
@@ -182,6 +253,22 @@ export class MealHistory implements OnInit {
     const [year, month, day] = value.split('-').map(Number);
     const date = new Date(year, month - 1, day);
     if (Number.isNaN(date.getTime())) return 'Fecha no disponible';
+
+    return date.toLocaleDateString('es-ES', {
+      weekday: format === 'long' ? 'long' : undefined,
+      year: 'numeric',
+      month: format === 'long' ? 'long' : 'short',
+      day: '2-digit',
+    });
+  }
+
+  private formatDateValue(value: string, format: 'short' | 'long'): string {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      return this.formatInputDate(value, format);
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return this.selectedDateLabel();
 
     return date.toLocaleDateString('es-ES', {
       weekday: format === 'long' ? 'long' : undefined,
