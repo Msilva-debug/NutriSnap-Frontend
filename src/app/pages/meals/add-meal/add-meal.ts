@@ -48,7 +48,9 @@ export class AddMeal {
   }
 
   analyzeImage(): void {
-    if (!this.selectedImage()) {
+    const image = this.selectedImage();
+
+    if (!image) {
       this.error.set('Por favor selecciona una imagen');
       return;
     }
@@ -56,20 +58,30 @@ export class AddMeal {
     this.isAnalyzing.set(true);
     this.error.set(null);
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      try {
-        const base64 = (e.target?.result as string).split(',')[1];
-        const result = await this.nutritionService.analyzeImage(base64);
-        this.analysisResult.set(result);
-        this.showModal.set(true);
-        this.isAnalyzing.set(false);
-      } catch (err) {
-        this.error.set(`Error al analizar la imagen: ${err}`);
-        this.isAnalyzing.set(false);
-      }
-    };
-    reader.readAsDataURL(this.selectedImage()!);
+    this.nutritionService
+      .analyzeImage(image)
+      .pipe(finalize(() => this.isAnalyzing.set(false)))
+      .subscribe({
+        next: (result) => {
+          this.analysisResult.set(result);
+          this.showModal.set(true);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.error.set(this.getAnalyzeImageErrorMessage(error));
+        },
+      });
+  }
+
+  private getAnalyzeImageErrorMessage(error: HttpErrorResponse): string {
+    const message = error.error?.message;
+
+    if (Array.isArray(message)) {
+      return message.join(' ');
+    }
+
+    return typeof message === 'string'
+      ? message
+      : 'No se pudo analizar la imagen. Intenta nuevamente.';
   }
 
   closeModal(): void {
