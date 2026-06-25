@@ -24,7 +24,6 @@ export class Recommendations implements OnInit {
 
   readonly filterModes: { value: RecommendationPeriod; label: string }[] = [
     { value: 'daily', label: 'Diario' },
-    { value: 'monthly', label: 'Mensual' },
     { value: 'range', label: 'Rango' },
   ];
   readonly fallbackRecommendations: RecommendationItem[] = [
@@ -47,7 +46,6 @@ export class Recommendations implements OnInit {
   ];
   readonly filterMode = signal<RecommendationPeriod>('daily');
   readonly selectedDate = signal(this.getTodayInputDate());
-  readonly selectedMonth = signal(this.getCurrentMonthInputValue());
   readonly rangeStartDate = signal(this.getTodayInputDate());
   readonly rangeEndDate = signal(this.getTodayInputDate());
   readonly recommendations = signal<RecommendationItem[]>([]);
@@ -67,10 +65,6 @@ export class Recommendations implements OnInit {
   readonly filterLabel = computed(() => {
     const mode = this.filterMode();
 
-    if (mode === 'monthly') {
-      return this.formatInputMonth(this.selectedMonth());
-    }
-
     if (mode === 'range') {
       return `del ${this.formatInputDate(this.rangeStartDate())} al ${this.formatInputDate(
         this.rangeEndDate(),
@@ -83,13 +77,6 @@ export class Recommendations implements OnInit {
   });
   readonly filterPayload = computed<RecommendationFilter>(() => {
     const mode = this.filterMode();
-
-    if (mode === 'monthly') {
-      return {
-        period: mode,
-        month: this.selectedMonth(),
-      };
-    }
 
     if (mode === 'range') {
       return {
@@ -134,15 +121,6 @@ export class Recommendations implements OnInit {
     if (!this.isValidInputDate(date)) return;
 
     this.selectedDate.set(date);
-    this.loadRecommendations();
-  }
-
-  updateSelectedMonth(event: Event): void {
-    const month = this.getInputValue(event);
-
-    if (!this.isValidInputMonth(month)) return;
-
-    this.selectedMonth.set(month);
     this.loadRecommendations();
   }
 
@@ -214,17 +192,6 @@ export class Recommendations implements OnInit {
     });
   }
 
-  private formatInputMonth(value: string): string {
-    const [year, month] = value.split('-').map(Number);
-    const date = new Date(year, month - 1, 1);
-    if (Number.isNaN(date.getTime())) return 'Mes no disponible';
-
-    return date.toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-    });
-  }
-
   private isValidInputDate(value: string): boolean {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
 
@@ -236,15 +203,6 @@ export class Recommendations implements OnInit {
       date.getMonth() === month - 1 &&
       date.getDate() === day
     );
-  }
-
-  private isValidInputMonth(value: string): boolean {
-    if (!/^\d{4}-\d{2}$/.test(value)) return false;
-
-    const [year, month] = value.split('-').map(Number);
-    const date = new Date(year, month - 1, 1);
-
-    return date.getFullYear() === year && date.getMonth() === month - 1;
   }
 
   private getRecommendationsErrorMessage(error: HttpErrorResponse): string {
@@ -267,10 +225,4 @@ export class Recommendations implements OnInit {
     return `${today.getFullYear()}-${month}-${day}`;
   }
 
-  private getCurrentMonthInputValue(): string {
-    const today = new Date();
-    const month = `${today.getMonth() + 1}`.padStart(2, '0');
-
-    return `${today.getFullYear()}-${month}`;
-  }
 }

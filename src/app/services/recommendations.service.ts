@@ -4,16 +4,12 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
-export type RecommendationPeriod = 'daily' | 'monthly' | 'range';
+export type RecommendationPeriod = 'daily' | 'range';
 
 export type RecommendationFilter =
   | {
       period: 'daily';
       date: string;
-    }
-  | {
-      period: 'monthly';
-      month: string;
     }
   | {
       period: 'range';
@@ -56,10 +52,6 @@ export class RecommendationsService {
 
     if (filter.period === 'daily') {
       return params.set('date', filter.date);
-    }
-
-    if (filter.period === 'monthly') {
-      return params.set('month', filter.month);
     }
 
     params = params.set('startDate', filter.startDate);
