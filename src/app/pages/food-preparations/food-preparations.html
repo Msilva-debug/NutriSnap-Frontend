@@ -1,0 +1,365 @@
+<div class="min-h-screen bg-gray-50 p-4 md:p-6">
+  <div class="mx-auto max-w-6xl space-y-6">
+    <header>
+      <h1 class="text-3xl font-bold text-gray-800">Mis preparaciones</h1>
+      <p class="mt-1 text-gray-500">Recetas y comidas reutilizables</p>
+    </header>
+
+    @if (error()) {
+      <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+        {{ error() }}
+      </div>
+    }
+
+    @if (success()) {
+      <div class="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+        {{ success() }}
+      </div>
+    }
+
+    <section class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+      <div class="space-y-6">
+        <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+          <div class="flex flex-col gap-4 md:flex-row md:items-end">
+            <label class="flex-1">
+              <span class="text-sm font-semibold text-gray-700">Preparación</span>
+              <textarea
+                [value]="description()"
+                (input)="updateDescription($event)"
+                rows="6"
+                class="mt-2 w-full resize-y rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
+                placeholder="Galletas con leche, azúcar, avena y huevo. Salieron 6 galletas."
+              ></textarea>
+            </label>
+
+            <label class="md:w-40">
+              <span class="text-sm font-semibold text-gray-700">Porciones</span>
+              <input
+                type="number"
+                min="1"
+                step="1"
+                [value]="servings() ?? ''"
+                (input)="updateServings($event)"
+                class="mt-2 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
+              />
+            </label>
+          </div>
+
+          @if (dictationInterimText()) {
+            <div class="mt-3 rounded-lg border border-primary-100 bg-primary-50 px-3 py-2 text-sm text-primary-700">
+              {{ dictationInterimText() }}
+            </div>
+          }
+
+          <div class="mt-4 flex flex-wrap gap-3">
+            <button
+              type="button"
+              (click)="startDictation()"
+              [disabled]="!isSpeechSupported() || dictationStatus() === 'listening'"
+              class="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-primary-contrast transition hover:bg-primary-600 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+            >
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 18.75a6 6 0 006-6v-1.5m-12 0v1.5a6 6 0 006 6m0 0v3.75m-3 0h6M12 15a3 3 0 003-3V5.25a3 3 0 00-6 0V12a3 3 0 003 3z"
+                />
+              </svg>
+              {{ dictationStatus() === 'paused' ? 'Continuar dictado' : 'Iniciar dictado' }}
+            </button>
+
+            <button
+              type="button"
+              (click)="pauseDictation()"
+              [disabled]="dictationStatus() !== 'listening'"
+              class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 disabled:cursor-not-allowed disabled:text-gray-300"
+            >
+              Pausar
+            </button>
+
+            <button
+              type="button"
+              (click)="stopDictation()"
+              [disabled]="dictationStatus() === 'idle'"
+              class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 disabled:cursor-not-allowed disabled:text-gray-300"
+            >
+              Detener
+            </button>
+
+            <button
+              type="button"
+              (click)="analyzePreparation()"
+              [disabled]="isAnalyzing()"
+              class="ml-auto rounded-lg bg-primary-500 px-5 py-2 text-sm font-semibold text-primary-contrast transition hover:bg-primary-600 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+            >
+              {{ isAnalyzing() ? 'Analizando...' : 'Analizar preparación' }}
+            </button>
+          </div>
+        </div>
+
+        @if (analysisForm) {
+          <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+            <div class="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p class="text-sm font-semibold text-primary-600">
+                  {{ editingPreparationId() ? 'Editar preparación' : 'Resultado IA' }}
+                </p>
+                <h2 class="text-xl font-bold text-gray-800">{{ analysisForm.name || 'Preparación' }}</h2>
+              </div>
+              <button
+                type="button"
+                (click)="resetEditor()"
+                class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300"
+              >
+                Limpiar
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <label>
+                <span class="text-sm font-semibold text-gray-700">Nombre</span>
+                <input
+                  type="text"
+                  [(ngModel)]="analysisForm.name"
+                  class="mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
+                />
+              </label>
+
+              <label>
+                <span class="text-sm font-semibold text-gray-700">Porciones</span>
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  [(ngModel)]="analysisForm.servings"
+                  class="mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
+                />
+              </label>
+
+              <label class="md:col-span-2">
+                <span class="text-sm font-semibold text-gray-700">Descripción</span>
+                <textarea
+                  rows="3"
+                  [(ngModel)]="analysisForm.description"
+                  class="mt-2 w-full resize-y rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
+                ></textarea>
+              </label>
+            </div>
+
+            <div class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+              <label class="rounded-xl bg-primary-50 p-3">
+                <span class="text-xs font-semibold text-primary-600">Calorías</span>
+                <input
+                  type="number"
+                  min="0"
+                  [(ngModel)]="analysisForm.caloriesPerServing"
+                  class="mt-2 w-full rounded-lg border border-primary-100 px-3 py-2 text-sm font-bold text-gray-800 outline-none focus:border-primary-400"
+                />
+              </label>
+
+              <label class="rounded-xl bg-blue-50 p-3">
+                <span class="text-xs font-semibold text-blue-600">Proteínas</span>
+                <input
+                  type="number"
+                  min="0"
+                  [(ngModel)]="analysisForm.proteinsPerServing"
+                  class="mt-2 w-full rounded-lg border border-blue-100 px-3 py-2 text-sm font-bold text-gray-800 outline-none focus:border-blue-300"
+                />
+              </label>
+
+              <label class="rounded-xl bg-orange-50 p-3">
+                <span class="text-xs font-semibold text-orange-600">Carbos</span>
+                <input
+                  type="number"
+                  min="0"
+                  [(ngModel)]="analysisForm.carbsPerServing"
+                  class="mt-2 w-full rounded-lg border border-orange-100 px-3 py-2 text-sm font-bold text-gray-800 outline-none focus:border-orange-300"
+                />
+              </label>
+
+              <label class="rounded-xl bg-yellow-50 p-3">
+                <span class="text-xs font-semibold text-yellow-700">Grasas</span>
+                <input
+                  type="number"
+                  min="0"
+                  [(ngModel)]="analysisForm.fatsPerServing"
+                  class="mt-2 w-full rounded-lg border border-yellow-100 px-3 py-2 text-sm font-bold text-gray-800 outline-none focus:border-yellow-300"
+                />
+              </label>
+            </div>
+
+            <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+              <label>
+                <span class="text-sm font-semibold text-gray-700">Micronutrientes</span>
+                <textarea
+                  rows="3"
+                  [(ngModel)]="analysisForm.micronutrients"
+                  class="mt-2 w-full resize-y rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
+                ></textarea>
+              </label>
+
+              <label>
+                <span class="text-sm font-semibold text-gray-700">Notas</span>
+                <textarea
+                  rows="3"
+                  [(ngModel)]="analysisForm.notes"
+                  class="mt-2 w-full resize-y rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
+                ></textarea>
+              </label>
+            </div>
+
+            <div class="mt-5 flex justify-end">
+              <button
+                type="button"
+                (click)="savePreparation()"
+                [disabled]="isSaving()"
+                class="rounded-lg bg-primary-500 px-5 py-2.5 text-sm font-semibold text-primary-contrast transition hover:bg-primary-600 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+              >
+                {{ isSaving() ? 'Guardando...' : 'Guardar preparación' }}
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <aside class="space-y-4">
+        <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-bold text-gray-800">Guardadas</h2>
+            @if (isLoadingPreparations()) {
+              <span class="text-xs font-semibold text-gray-400">Cargando...</span>
+            }
+          </div>
+
+          <div class="mt-4 space-y-3">
+            @if (!isLoadingPreparations() && preparations().length === 0) {
+              <div class="rounded-lg border border-gray-100 bg-gray-50 px-4 py-3 text-sm text-gray-500">
+                No tienes preparaciones activas.
+              </div>
+            }
+
+            @for (preparation of preparations(); track preparation.id) {
+              <article class="rounded-xl border border-gray-100 p-4">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 class="font-bold text-gray-800">{{ preparation.name }}</h3>
+                    <p class="mt-1 text-xs text-gray-400">{{ preparation.servings }} porciones</p>
+                  </div>
+                  <span class="rounded-full bg-primary-50 px-2.5 py-1 text-xs font-bold text-primary-600">
+                    {{ preparation.caloriesPerServing }} kcal
+                  </span>
+                </div>
+
+                <div class="mt-3 grid grid-cols-3 gap-2 text-center">
+                  <div class="rounded-lg bg-blue-50 px-2 py-2">
+                    <p class="text-[11px] font-semibold text-blue-600">Prot.</p>
+                    <p class="text-sm font-bold text-blue-800">{{ preparation.proteinsPerServing }}g</p>
+                  </div>
+                  <div class="rounded-lg bg-orange-50 px-2 py-2">
+                    <p class="text-[11px] font-semibold text-orange-600">Carbos</p>
+                    <p class="text-sm font-bold text-orange-800">{{ preparation.carbsPerServing }}g</p>
+                  </div>
+                  <div class="rounded-lg bg-yellow-50 px-2 py-2">
+                    <p class="text-[11px] font-semibold text-yellow-700">Grasas</p>
+                    <p class="text-sm font-bold text-yellow-800">{{ preparation.fatsPerServing }}g</p>
+                  </div>
+                </div>
+
+                <div class="mt-4 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    (click)="loadPreparationDetail(preparation)"
+                    class="rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-600 transition hover:border-gray-300"
+                  >
+                    Ver detalle
+                  </button>
+                  <button
+                    type="button"
+                    (click)="editPreparation(preparation)"
+                    class="rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-600 transition hover:border-gray-300"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    (click)="deactivatePreparation(preparation)"
+                    [disabled]="deactivatingPreparationIds().has(preparation.id)"
+                    class="col-span-2 rounded-lg border border-red-100 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:text-red-300"
+                  >
+                    {{
+                      deactivatingPreparationIds().has(preparation.id)
+                        ? 'Desactivando...'
+                        : 'Desactivar preparación'
+                    }}
+                  </button>
+                </div>
+              </article>
+            }
+          </div>
+        </div>
+      </aside>
+    </section>
+  </div>
+</div>
+
+@if (selectedPreparation()) {
+  @let detail = selectedPreparation()!;
+  <div class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 backdrop-blur-sm sm:items-center">
+    <div class="w-full max-w-lg rounded-2xl bg-white shadow-xl">
+      <div class="flex items-start justify-between border-b border-gray-100 px-6 py-4">
+        <div>
+          <h2 class="text-lg font-bold text-gray-900">{{ detail.name }}</h2>
+          <p class="text-xs text-gray-400">{{ detail.servings }} porciones</p>
+        </div>
+        <button
+          type="button"
+          (click)="closeDetail()"
+          class="rounded-lg p-1 text-gray-400 transition hover:text-gray-600"
+          aria-label="Cerrar detalle"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="space-y-4 px-6 py-5">
+        <p class="text-sm leading-relaxed text-gray-600">{{ detail.description }}</p>
+
+        <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div class="rounded-xl bg-primary-50 p-3 text-center">
+            <p class="text-xs font-semibold text-primary-600">Calorías</p>
+            <p class="mt-1 text-xl font-bold text-primary-700">{{ detail.caloriesPerServing }}</p>
+          </div>
+          <div class="rounded-xl bg-blue-50 p-3 text-center">
+            <p class="text-xs font-semibold text-blue-600">Proteínas</p>
+            <p class="mt-1 text-xl font-bold text-blue-700">{{ detail.proteinsPerServing }}g</p>
+          </div>
+          <div class="rounded-xl bg-orange-50 p-3 text-center">
+            <p class="text-xs font-semibold text-orange-600">Carbos</p>
+            <p class="mt-1 text-xl font-bold text-orange-700">{{ detail.carbsPerServing }}g</p>
+          </div>
+          <div class="rounded-xl bg-yellow-50 p-3 text-center">
+            <p class="text-xs font-semibold text-yellow-700">Grasas</p>
+            <p class="mt-1 text-xl font-bold text-yellow-700">{{ detail.fatsPerServing }}g</p>
+          </div>
+        </div>
+
+        @if (detail.micronutrients) {
+          <div class="rounded-xl bg-gray-50 p-4">
+            <p class="text-xs font-bold uppercase text-gray-500">Micronutrientes</p>
+            <p class="mt-2 text-sm text-gray-600">{{ detail.micronutrients }}</p>
+          </div>
+        }
+
+        @if (detail.notes) {
+          <div class="rounded-xl bg-gray-50 p-4">
+            <p class="text-xs font-bold uppercase text-gray-500">Notas</p>
+            <p class="mt-2 text-sm text-gray-600">{{ detail.notes }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

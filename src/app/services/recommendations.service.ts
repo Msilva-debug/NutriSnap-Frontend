@@ -23,8 +23,25 @@ export interface RecommendationItem {
   category?: string;
 }
 
+export type RecommendationComparisonPoint =
+  | string
+  | {
+      title?: string;
+      description?: string;
+      category?: string;
+    };
+
+export interface RecommendationComparison {
+  available: boolean;
+  summary?: string;
+  improvements?: RecommendationComparisonPoint[];
+  needsAttention?: RecommendationComparisonPoint[];
+  stablePatterns?: RecommendationComparisonPoint[];
+}
+
 export interface RecommendationsResponse {
   period: RecommendationPeriod;
+  comparison?: RecommendationComparison;
   summary?: string;
   recommendations: RecommendationItem[];
 }

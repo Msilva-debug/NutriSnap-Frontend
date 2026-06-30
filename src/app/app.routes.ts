@@ -32,6 +32,13 @@ export const routes: Routes = [
           import('./pages/recommendations/recommendations').then((m) => m.Recommendations),
       },
       {
+        path: 'food-preparations',
+        loadComponent: () =>
+          import('./pages/food-preparations/food-preparations').then(
+            (m) => m.FoodPreparations,
+          ),
+      },
+      {
         path: 'configuration',
         loadComponent: () =>
           import('./pages/configuration/configuration').then((m) => m.Configuration),

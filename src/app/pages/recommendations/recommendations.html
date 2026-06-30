@@ -93,19 +93,101 @@
       </div>
     }
 
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-      @for (recommendation of visibleRecommendations(); track recommendation.title) {
-        <div class="rounded-xl bg-white p-5 shadow-md">
-          <p class="text-sm font-semibold text-primary-600">
-            {{ recommendation.category || 'Recomendación' }}
-          </p>
-          <h2 class="mt-2 text-lg font-bold text-gray-800">{{ recommendation.title }}</h2>
-          <p class="mt-2 text-sm text-gray-500">
-            {{ recommendation.description }}
-          </p>
+    <div class="mb-4 flex justify-start">
+      <div
+        class="inline-grid grid-cols-2 gap-1 rounded-lg bg-gray-100 p-1"
+        role="radiogroup"
+        aria-label="Vista de recomendaciones"
+      >
+        @for (view of viewModes; track view.value) {
+          <button
+            type="button"
+            role="radio"
+            [attr.aria-checked]="selectedView() === view.value"
+            (click)="setSelectedView(view.value)"
+            [class]="
+              selectedView() === view.value
+                ? 'rounded-md bg-white px-4 py-2 text-sm font-semibold text-primary-700 shadow-sm'
+                : 'rounded-md px-4 py-2 text-sm font-semibold text-gray-500 hover:text-gray-700'
+            "
+          >
+            {{ view.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (selectedView() === 'recommendations') {
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+        @for (recommendation of visibleRecommendations(); track recommendation.title) {
+          <div class="rounded-xl bg-white p-5 shadow-md">
+            <p class="text-sm font-semibold text-primary-600">
+              {{ recommendation.category || 'Recomendación' }}
+            </p>
+            <h2 class="mt-2 text-lg font-bold text-gray-800">{{ recommendation.title }}</h2>
+            <p class="mt-2 text-sm text-gray-500">
+              {{ recommendation.description }}
+            </p>
+          </div>
+        }
+      </div>
+    } @else {
+      @let currentComparison = comparison();
+
+      @if (currentComparison) {
+        <section class="space-y-4">
+          <div
+            [class]="
+              currentComparison.available
+                ? 'rounded-lg border border-primary-100 bg-primary-50 px-4 py-3'
+                : 'rounded-lg border border-yellow-100 bg-yellow-50 px-4 py-3'
+            "
+          >
+            <p
+              [class]="
+                currentComparison.available
+                  ? 'text-xs font-bold uppercase text-primary-600'
+                  : 'text-xs font-bold uppercase text-yellow-700'
+              "
+            >
+              {{ currentComparison.available ? 'Comparación disponible' : 'Comparación limitada' }}
+            </p>
+            <p class="mt-1 text-sm font-semibold text-gray-700">
+              {{ currentComparison.summary || 'No se recibió un resumen de comparación.' }}
+            </p>
+          </div>
+
+          @if (hasComparisonDetails()) {
+            @for (group of comparisonGroups(); track group.title) {
+              @if (group.items.length) {
+                <div>
+                  <h2 class="mb-3 text-sm font-bold uppercase text-gray-500">{{ group.title }}</h2>
+                  <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    @for (item of group.items; track item.title) {
+                      <div class="rounded-xl bg-white p-5 shadow-md">
+                        <p class="text-sm font-semibold text-primary-600">
+                          {{ item.category || group.title }}
+                        </p>
+                        <h3 class="mt-2 text-lg font-bold text-gray-800">{{ item.title }}</h3>
+                        <p class="mt-2 text-sm text-gray-500">{{ item.description }}</p>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            }
+          } @else {
+            <div class="rounded-lg border border-gray-100 bg-white px-4 py-3 text-sm font-medium text-gray-500 shadow-sm">
+              No se recibieron mejoras, alertas o patrones adicionales para comparar.
+            </div>
+          }
+        </section>
+      } @else {
+        <div class="rounded-lg border border-gray-100 bg-white px-4 py-3 text-sm font-medium text-gray-500 shadow-sm">
+          Aún no hay información de comparación para este periodo.
         </div>
       }
-    </div>
+    }
   </div>
 </div>
 
