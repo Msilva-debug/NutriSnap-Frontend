@@ -31,9 +31,14 @@
           type="button"
           (click)="refreshMeals()"
           [disabled]="isLoadingMeals()"
-          class="inline-flex h-10 items-center justify-center rounded-xl border border-gray-200 bg-white px-4 text-sm font-bold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+          class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 text-sm font-bold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Actualizar
+          @if (isLoadingMeals()) {
+            <app-loading-spinner />
+            Cargando...
+          } @else {
+            Actualizar
+          }
         </button>
         <a
           routerLink="/meals/add"
@@ -98,17 +103,7 @@
 
         @if (isLoadingMeals()) {
           <div class="flex flex-col items-center justify-center py-14 text-gray-500">
-            <svg class="mb-4 h-8 w-8 animate-spin text-primary-500" fill="none" viewBox="0 0 24 24">
-              <circle
-                class="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-              ></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-            </svg>
+            <app-loading-spinner size="mb-4 h-8 w-8" tone="text-primary-500" />
             <p>Cargando historial de comidas...</p>
           </div>
         } @else if (mealsError()) {
@@ -277,9 +272,14 @@
             type="button"
             (click)="deleteDayNote()"
             [disabled]="isSavingDayNote()"
-            class="rounded-xl border border-red-100 px-4 py-2.5 text-sm font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+            class="inline-flex items-center justify-center gap-2 rounded-xl border border-red-100 px-4 py-2.5 text-sm font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Eliminar nota
+            @if (dayNoteAction() === 'delete') {
+              <app-loading-spinner />
+              Eliminando...
+            } @else {
+              Eliminar nota
+            }
           </button>
         }
 
@@ -296,9 +296,14 @@
           type="button"
           (click)="saveDayNote()"
           [disabled]="isSavingDayNote()"
-          class="rounded-xl bg-primary-500 px-4 py-2.5 text-sm font-bold text-primary-contrast shadow-md transition hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-60"
+          class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-500 px-4 py-2.5 text-sm font-bold text-primary-contrast shadow-md transition hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {{ isSavingDayNote() ? 'Guardando...' : 'Guardar nota' }}
+          @if (dayNoteAction() === 'save') {
+            <app-loading-spinner />
+            Guardando...
+          } @else {
+            Guardar nota
+          }
         </button>
       </div>
     </div>

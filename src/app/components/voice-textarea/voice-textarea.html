@@ -1,0 +1,56 @@
+<label class="block">
+  <span class="text-sm font-semibold text-gray-700">{{ label() }}</span>
+  @if (hint()) {
+    <span class="mt-1 block text-xs text-gray-400">{{ hint() }}</span>
+  }
+  <textarea
+    [value]="value()"
+    (input)="updateValue($event)"
+    [rows]="rows()"
+    class="mt-2 w-full resize-y rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
+    [placeholder]="placeholder()"
+  ></textarea>
+</label>
+
+@if (dictationInterimText()) {
+  <div class="mt-3 rounded-lg border border-primary-100 bg-primary-50 px-3 py-2 text-sm text-primary-700">
+    {{ dictationInterimText() }}
+  </div>
+}
+
+<div class="mt-3 flex flex-wrap gap-2">
+  <button
+    type="button"
+    (click)="startDictation()"
+    [disabled]="!isSpeechSupported() || dictationStatus() === 'listening'"
+    class="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-primary-contrast transition hover:bg-primary-600 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+  >
+    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M12 18.75a6 6 0 006-6v-1.5m-12 0v1.5a6 6 0 006 6m0 0v3.75m-3 0h6M12 15a3 3 0 003-3V5.25a3 3 0 00-6 0V12a3 3 0 003 3z"
+      />
+    </svg>
+    {{ dictationStatus() === 'paused' ? 'Continuar dictado' : 'Dictar' }}
+  </button>
+
+  <button
+    type="button"
+    (click)="pauseDictation()"
+    [disabled]="dictationStatus() !== 'listening'"
+    class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 disabled:cursor-not-allowed disabled:text-gray-300"
+  >
+    Pausar
+  </button>
+
+  <button
+    type="button"
+    (click)="stopDictation()"
+    [disabled]="dictationStatus() === 'idle'"
+    class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 disabled:cursor-not-allowed disabled:text-gray-300"
+  >
+    Detener
+  </button>
+</div>

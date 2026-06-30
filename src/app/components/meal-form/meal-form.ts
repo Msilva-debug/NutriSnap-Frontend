@@ -3,10 +3,11 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { CommonModule } from '@angular/common';
 import { Meal } from '../../models/meal.model';
 import { MEAL_TYPE_OPTIONS } from '../../utils/meal-types.util';
+import { LoadingSpinner } from '../loading-spinner/loading-spinner';
 
 @Component({
   selector: 'app-meal-form',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, LoadingSpinner],
   templateUrl: './meal-form.html',
   styles: ``,
 })

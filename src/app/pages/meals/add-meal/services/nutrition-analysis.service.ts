@@ -11,6 +11,11 @@ export interface ActivityLevel {
   label: string;
   description: string;
 }
+
+export interface MealDescriptionAnalysisRequest {
+  description: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -22,13 +27,27 @@ export class NutritionAnalysisService {
     private authService: AuthService,
   ) {}
 
-  analyzeImage(image: File): Observable<FoodAnalysisResult> {
+  analyzeImage(image: File, description?: string): Observable<FoodAnalysisResult> {
     const formData = new FormData();
     formData.append('image', image);
+
+    if (description?.trim()) {
+      formData.append('description', description.trim());
+    }
 
     return this.http.post<FoodAnalysisResult>(`${this.BACKEND_URL}/meal/analyze-image`, formData, {
       headers: this.getAuthHeaders(),
     });
+  }
+
+  analyzeDescription(request: MealDescriptionAnalysisRequest): Observable<FoodAnalysisResult> {
+    return this.http.post<FoodAnalysisResult>(
+      `${this.BACKEND_URL}/meal/analyze-description`,
+      request,
+      {
+        headers: this.getAuthHeaders(),
+      },
+    );
   }
 
   getActivityLevels(): Observable<ActivityLevel[]> {

@@ -59,9 +59,10 @@
     <button
       type="submit"
       [disabled]="loading()"
-      class="w-full bg-primary-500 hover:bg-primary-600 disabled:opacity-60 text-primary-contrast font-semibold py-2 rounded-lg transition cursor-pointer"
+      class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary-500 py-2 font-semibold text-primary-contrast transition hover:bg-primary-600 disabled:opacity-60 cursor-pointer"
     >
       @if (loading()) {
+        <app-loading-spinner />
         Guardando...
       } @else {
         Agregar comida

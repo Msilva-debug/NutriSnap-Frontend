@@ -3,6 +3,7 @@ import { Component, HostListener, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
+import { LoadingSpinner } from '../../components/loading-spinner/loading-spinner';
 import { MealMacroDetail, MealMacroSummary } from '../../components/meal-macro-summary/meal-macro-summary';
 import { NutrientOverageAlert } from '../../components/nutrient-overage-alert/nutrient-overage-alert';
 import { Meal } from '../../models/meal.model';
@@ -22,7 +23,7 @@ interface MacroStat {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, RouterLink, MealMacroSummary, NutrientOverageAlert],
+  imports: [CommonModule, RouterLink, LoadingSpinner, MealMacroSummary, NutrientOverageAlert],
   templateUrl: './dashboard.html',
   styles: ``,
 })
@@ -63,15 +64,15 @@ export class Dashboard implements OnInit {
   }
 
   get totalProteins() {
-    return this.meals().reduce((sum, meal) => sum + this.getMealMacro(meal.proteins), 0);
+    return this.roundMacro(this.meals().reduce((sum, meal) => sum + this.getMealMacro(meal.proteins), 0));
   }
 
   get totalCarbs() {
-    return this.meals().reduce((sum, meal) => sum + this.getMealMacro(meal.carbs), 0);
+    return this.roundMacro(this.meals().reduce((sum, meal) => sum + this.getMealMacro(meal.carbs), 0));
   }
 
   get totalFats() {
-    return this.meals().reduce((sum, meal) => sum + this.getMealMacro(meal.fats), 0);
+    return this.roundMacro(this.meals().reduce((sum, meal) => sum + this.getMealMacro(meal.fats), 0));
   }
 
   get calorieGoal() {
@@ -283,7 +284,11 @@ export class Dashboard implements OnInit {
   private getMealMacro(value: number | undefined): number {
     const macro = Number(value);
 
-    return Number.isFinite(macro) && macro > 0 ? macro : 0;
+    return Number.isFinite(macro) && macro > 0 ? this.roundMacro(macro) : 0;
+  }
+
+  private roundMacro(value: number): number {
+    return Math.round((value + Number.EPSILON) * 10) / 10;
   }
 
   private getPositiveNumber(value: unknown, fallback = 0): number {

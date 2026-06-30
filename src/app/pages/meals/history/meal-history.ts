@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
+import { LoadingSpinner } from '../../../components/loading-spinner/loading-spinner';
 import { Meal } from '../../../models/meal.model';
 import { MealHistoryResponse, MealService } from '../../../services/meal.service';
 import {
@@ -21,7 +22,7 @@ interface MealTypeSummary {
 
 @Component({
   selector: 'app-meal-history',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, LoadingSpinner],
   templateUrl: './meal-history.html',
   styles: ``,
 })
@@ -37,6 +38,7 @@ export class MealHistory implements OnInit {
   readonly dayNoteDraft = signal('');
   readonly isDayNoteModalOpen = signal(false);
   readonly isSavingDayNote = signal(false);
+  readonly dayNoteAction = signal<'save' | 'delete' | null>(null);
   readonly dayNoteError = signal<string | null>(null);
   readonly todayInputDate = this.getTodayInputDate();
   readonly selectedDateLabel = computed(() => this.formatInputDate(this.selectedDate(), 'long'));
@@ -56,15 +58,15 @@ export class MealHistory implements OnInit {
   }
 
   get totalProteins(): number {
-    return this.meals().reduce((sum, meal) => sum + this.getMealMacro(meal.proteins), 0);
+    return this.roundMacro(this.meals().reduce((sum, meal) => sum + this.getMealMacro(meal.proteins), 0));
   }
 
   get totalCarbs(): number {
-    return this.meals().reduce((sum, meal) => sum + this.getMealMacro(meal.carbs), 0);
+    return this.roundMacro(this.meals().reduce((sum, meal) => sum + this.getMealMacro(meal.carbs), 0));
   }
 
   get totalFats(): number {
-    return this.meals().reduce((sum, meal) => sum + this.getMealMacro(meal.fats), 0);
+    return this.roundMacro(this.meals().reduce((sum, meal) => sum + this.getMealMacro(meal.fats), 0));
   }
 
   get mealTypeSummaries(): MealTypeSummary[] {
@@ -115,12 +117,12 @@ export class MealHistory implements OnInit {
   saveDayNote(): void {
     const note = this.dayNoteDraft().trim();
 
-    this.persistDayNoteInBackend(note);
+    this.persistDayNoteInBackend(note, 'save');
   }
 
   deleteDayNote(): void {
     this.dayNoteDraft.set('');
-    this.persistDayNoteInBackend('');
+    this.persistDayNoteInBackend('', 'delete');
   }
 
   getMealTypeLabel(type: Meal['type']): string {
@@ -160,7 +162,11 @@ export class MealHistory implements OnInit {
   getMealMacro(value: number | undefined): number {
     const macro = Number(value);
 
-    return Number.isFinite(macro) && macro > 0 ? macro : 0;
+    return Number.isFinite(macro) && macro > 0 ? this.roundMacro(macro) : 0;
+  }
+
+  private roundMacro(value: number): number {
+    return Math.round((value + Number.EPSILON) * 10) / 10;
   }
 
   private loadMealsByDate(): void {
@@ -194,15 +200,19 @@ export class MealHistory implements OnInit {
       : 'No se pudieron cargar las comidas de la fecha seleccionada.';
   }
 
-  private persistDayNoteInBackend(note: string): void {
+  private persistDayNoteInBackend(note: string, action: 'save' | 'delete'): void {
     const date = this.selectedDate();
 
     this.isSavingDayNote.set(true);
+    this.dayNoteAction.set(action);
     this.dayNoteError.set(null);
 
     this.mealService
       .saveHistoryNote({ date, note })
-      .pipe(finalize(() => this.isSavingDayNote.set(false)))
+      .pipe(finalize(() => {
+        this.isSavingDayNote.set(false);
+        this.dayNoteAction.set(null);
+      }))
       .subscribe({
         next: (savedNote) => {
           const nextNote = savedNote.note ?? note;

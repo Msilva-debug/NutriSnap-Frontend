@@ -1,5 +1,7 @@
-import { Component, output, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { Component, DestroyRef, inject, output, signal } from '@angular/core';
+import { NavigationEnd, RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs';
 import { RabbitIcon } from '../rabbit-icon/rabbit-icon';
 import { AuthService } from '../../services/auth.service';
 
@@ -10,13 +12,26 @@ import { AuthService } from '../../services/auth.service';
   styles: ``,
 })
 export class Sidebar {
+  private readonly destroyRef = inject(DestroyRef);
+
   closeRequested = output<void>();
   mealsMenuOpen = signal(false);
 
   constructor(
     private router: Router,
     private authService: AuthService,
-  ) {}
+  ) {
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((event) => {
+        if (!event.urlAfterRedirects.startsWith('/meals')) {
+          this.mealsMenuOpen.set(false);
+        }
+      });
+  }
 
   close(): void {
     this.closeRequested.emit();

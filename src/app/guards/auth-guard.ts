@@ -19,3 +19,18 @@ export const authGuard: CanActivateFn = (route, state) => {
   }
   return true;
 };
+
+export const guestGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (authService.hasValidToken()) {
+    return router.createUrlTree(['/dashboard']);
+  }
+
+  if (authService.hasToken() && authService.isTokenExpired()) {
+    authService.logout();
+  }
+
+  return true;
+};

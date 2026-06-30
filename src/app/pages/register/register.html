@@ -332,23 +332,11 @@
             <button
               type="submit"
               [disabled]="loading()"
-              class="flex-1 py-3 bg-primary-500 hover:bg-primary-600 disabled:opacity-60 text-primary-contrast font-semibold rounded-xl transition shadow-md cursor-pointer"
+              class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary-500 py-3 font-semibold text-primary-contrast shadow-md transition hover:bg-primary-600 disabled:opacity-60 cursor-pointer"
             >
               @if (loading()) {
-                <span class="inline-flex items-center justify-center gap-2">
-                  <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <circle
-                      class="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      stroke-width="4"
-                    />
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                  </svg>
-                  Creando cuenta...
-                </span>
+                <app-loading-spinner />
+                Creando cuenta...
               } @else {
                 Crear cuenta
               }

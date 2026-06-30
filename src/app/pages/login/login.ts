@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize, forkJoin, switchMap } from 'rxjs';
+import { LoadingSpinner } from '../../components/loading-spinner/loading-spinner';
 import { RabbitIcon } from '../../components/rabbit-icon/rabbit-icon';
 import { AuthService, LoginRequest } from '../../services/auth.service';
 import { MealStateService } from '../../services/meal-state.service';
@@ -10,7 +11,7 @@ import { NutritionPlanStateService } from '../../services/nutrition-plan-state.s
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink, RabbitIcon],
+  imports: [ReactiveFormsModule, RouterLink, RabbitIcon, LoadingSpinner],
   templateUrl: './login.html',
   styles: ``,
 })

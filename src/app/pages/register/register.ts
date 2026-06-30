@@ -15,6 +15,7 @@ import {
   ActivityLevel,
   NutritionAnalysisService,
 } from '../meals/add-meal/services/nutrition-analysis.service';
+import { LoadingSpinner } from '../../components/loading-spinner/loading-spinner';
 import { RabbitIcon } from '../../components/rabbit-icon/rabbit-icon';
 import { ThemeCustomizer } from '../../components/theme-customizer/theme-customizer';
 import { CreateUserRequest, UserService } from '../../services/user.service';
@@ -22,7 +23,7 @@ import { AppTheme, ThemeService } from '../../services/theme.service';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink, RabbitIcon, ThemeCustomizer],
+  imports: [ReactiveFormsModule, RouterLink, RabbitIcon, ThemeCustomizer, LoadingSpinner],
   templateUrl: './register.html',
   styles: ``,
 })

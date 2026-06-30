@@ -1,13 +1,14 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { finalize } from 'rxjs';
+import { LoadingSpinner } from '../../components/loading-spinner/loading-spinner';
 import { ThemeCustomizer } from '../../components/theme-customizer/theme-customizer';
 import { AppTheme, normalizeTheme, ThemeService } from '../../services/theme.service';
 import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-configuration',
-  imports: [ThemeCustomizer],
+  imports: [ThemeCustomizer, LoadingSpinner],
   templateUrl: './configuration.html',
   styles: ``,
 })

@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { finalize, Subscription } from 'rxjs';
+import { LoadingSpinner } from '../../components/loading-spinner/loading-spinner';
 import {
   RecommendationComparison,
   RecommendationComparisonPoint,
@@ -27,7 +28,7 @@ interface ComparisonGroup {
 
 @Component({
   selector: 'app-recommendations',
-  imports: [],
+  imports: [LoadingSpinner],
   templateUrl: './recommendations.html',
   styles: ``,
 })

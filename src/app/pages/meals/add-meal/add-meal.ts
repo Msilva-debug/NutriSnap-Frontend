@@ -1,8 +1,11 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
+import { FoodPreparationCard } from '../../../components/food-preparation-card/food-preparation-card';
+import { LoadingSpinner } from '../../../components/loading-spinner/loading-spinner';
+import { VoiceTextarea } from '../../../components/voice-textarea/voice-textarea';
 import { NutritionAnalysisService } from './services/nutrition-analysis.service';
 import { FoodPreparation } from '../../../models/food-preparation.model';
 import { FoodAnalysisResult } from '../../../models/meal.model';
@@ -11,15 +14,19 @@ import { FoodPreparationService } from '../../../services/food-preparation.servi
 import { MealStateService } from '../../../services/meal-state.service';
 import { MEAL_TYPE_OPTIONS, MealType } from '../../../utils/meal-types.util';
 
+type MealAnalysisMode = 'photo' | 'text';
+
 @Component({
   selector: 'app-add-meal',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FoodPreparationCard, LoadingSpinner, VoiceTextarea],
   templateUrl: './add-meal.html',
   styles: ``,
 })
 export class AddMeal implements OnInit {
+  analysisMode = signal<MealAnalysisMode>('photo');
   selectedImage = signal<File | null>(null);
   imagePreview = signal<string | null>(null);
+  mealDescription = signal('');
   preparations = signal<FoodPreparation[]>([]);
   selectedPreparation = signal<FoodPreparation | null>(null);
   consumedServings = signal<number | null>(1);
@@ -33,6 +40,11 @@ export class AddMeal implements OnInit {
   error = signal<string | null>(null);
   success = signal<string | null>(null);
   readonly mealTypeOptions = MEAL_TYPE_OPTIONS;
+  readonly hasMealInput = computed(() =>
+    this.analysisMode() === 'photo'
+      ? this.selectedImage() !== null
+      : this.mealDescription().trim().length > 0,
+  );
 
   constructor(
     private nutritionService: NutritionAnalysisService,
@@ -45,11 +57,23 @@ export class AddMeal implements OnInit {
     this.loadFoodPreparations();
   }
 
+  setAnalysisMode(mode: MealAnalysisMode): void {
+    this.analysisMode.set(mode);
+    this.selectedPreparation.set(null);
+    this.error.set(null);
+    this.success.set(null);
+
+    if (mode === 'text') {
+      this.clearImage();
+    }
+  }
+
   onImageSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
 
+    this.analysisMode.set('photo');
     this.selectedImage.set(file);
     this.selectedPreparation.set(null);
     this.error.set(null);
@@ -62,11 +86,26 @@ export class AddMeal implements OnInit {
     reader.readAsDataURL(file);
   }
 
-  analyzeImage(): void {
-    const image = this.selectedImage();
+  updateMealDescription(description: string): void {
+    this.mealDescription.set(description);
 
-    if (!image) {
-      this.error.set('Por favor selecciona una imagen');
+    if (description.trim()) {
+      this.selectedPreparation.set(null);
+    }
+
+    this.error.set(null);
+    this.success.set(null);
+  }
+
+  analyzeMeal(): void {
+    const mode = this.analysisMode();
+
+    if (!this.hasMealInput()) {
+      this.error.set(
+        mode === 'photo'
+          ? 'Selecciona una foto de tu comida.'
+          : 'Describe lo que comiste antes de analizar.',
+      );
       return;
     }
 
@@ -74,8 +113,14 @@ export class AddMeal implements OnInit {
     this.error.set(null);
     this.success.set(null);
 
-    this.nutritionService
-      .analyzeImage(image)
+    const request =
+      mode === 'photo'
+        ? this.nutritionService.analyzeImage(this.selectedImage()!)
+        : this.nutritionService.analyzeDescription({
+            description: this.mealDescription().trim(),
+          });
+
+    request
       .pipe(finalize(() => this.isAnalyzing.set(false)))
       .subscribe({
         next: (result) => {
@@ -97,7 +142,7 @@ export class AddMeal implements OnInit {
 
     return typeof message === 'string'
       ? message
-      : 'No se pudo analizar la imagen. Intenta nuevamente.';
+      : 'No se pudo analizar la comida. Intenta nuevamente.';
   }
 
   closeModal(): void {
@@ -186,8 +231,15 @@ export class AddMeal implements OnInit {
   reset(): void {
     this.selectedImage.set(null);
     this.imagePreview.set(null);
+    this.mealDescription.set('');
     this.analysisResult.set(null);
     this.showModal.set(false);
+    this.error.set(null);
+  }
+
+  clearImage(): void {
+    this.selectedImage.set(null);
+    this.imagePreview.set(null);
     this.error.set(null);
   }
 

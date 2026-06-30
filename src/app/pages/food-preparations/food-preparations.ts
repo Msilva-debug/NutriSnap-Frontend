@@ -1,80 +1,37 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
+import { FoodPreparationCard } from '../../components/food-preparation-card/food-preparation-card';
+import { LoadingSpinner } from '../../components/loading-spinner/loading-spinner';
+import { VoiceTextarea } from '../../components/voice-textarea/voice-textarea';
 import { FoodPreparation, FoodPreparationForm } from '../../models/food-preparation.model';
 import { FoodPreparationService } from '../../services/food-preparation.service';
 
-type DictationStatus = 'idle' | 'listening' | 'paused';
-
-interface SpeechRecognitionAlternativeLike {
-  transcript: string;
-}
-
-interface SpeechRecognitionResultLike {
-  isFinal: boolean;
-  [index: number]: SpeechRecognitionAlternativeLike;
-}
-
-interface SpeechRecognitionResultListLike {
-  length: number;
-  [index: number]: SpeechRecognitionResultLike;
-}
-
-interface SpeechRecognitionEventLike extends Event {
-  resultIndex: number;
-  results: SpeechRecognitionResultListLike;
-}
-
-interface SpeechRecognitionErrorEventLike extends Event {
-  error?: string;
-}
-
-interface SpeechRecognitionLike {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
-  onerror: ((event: SpeechRecognitionErrorEventLike) => void) | null;
-  onend: (() => void) | null;
-  start(): void;
-  stop(): void;
-  abort(): void;
-}
-
-interface SpeechRecognitionConstructorLike {
-  new (): SpeechRecognitionLike;
-}
-
-type SpeechWindow = Window & {
-  SpeechRecognition?: SpeechRecognitionConstructorLike;
-  webkitSpeechRecognition?: SpeechRecognitionConstructorLike;
-};
+type PreparationLoadAction = 'detail' | 'edit';
 
 @Component({
   selector: 'app-food-preparations',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FoodPreparationCard, LoadingSpinner, VoiceTextarea],
   templateUrl: './food-preparations.html',
   styles: ``,
 })
 export class FoodPreparations implements OnInit {
   private readonly foodPreparationService = inject(FoodPreparationService);
-  private readonly destroyRef = inject(DestroyRef);
-  private recognition: SpeechRecognitionLike | null = null;
 
   readonly preparations = signal<FoodPreparation[]>([]);
   readonly selectedPreparation = signal<FoodPreparation | null>(null);
   readonly editingPreparationId = signal<number | null>(null);
   readonly description = signal('');
   readonly servings = signal<number | null>(null);
-  readonly dictationStatus = signal<DictationStatus>('idle');
-  readonly dictationInterimText = signal('');
-  readonly isSpeechSupported = signal(this.getSpeechRecognitionConstructor() !== null);
   readonly isLoadingPreparations = signal(false);
   readonly isAnalyzing = signal(false);
   readonly isSaving = signal(false);
-  readonly loadingDetailId = signal<number | null>(null);
+  readonly loadingPreparationAction = signal<{
+    preparationId: number;
+    action: PreparationLoadAction;
+  } | null>(null);
   readonly deactivatingPreparationIds = signal<Set<number>>(new Set());
   readonly error = signal<string | null>(null);
   readonly success = signal<string | null>(null);
@@ -83,64 +40,10 @@ export class FoodPreparations implements OnInit {
 
   ngOnInit(): void {
     this.loadPreparations();
-    this.destroyRef.onDestroy(() => this.destroySpeechRecognition());
-  }
-
-  updateDescription(event: Event): void {
-    this.description.set((event.target as HTMLTextAreaElement).value);
   }
 
   updateServings(event: Event): void {
     this.servings.set(this.getOptionalPositiveNumber(event));
-  }
-
-  startDictation(): void {
-    const SpeechRecognition = this.getSpeechRecognitionConstructor();
-
-    if (!SpeechRecognition) {
-      this.error.set('El dictado por voz no está disponible en este navegador.');
-      return;
-    }
-
-    if (!this.recognition) {
-      this.recognition = new SpeechRecognition();
-      this.recognition.continuous = true;
-      this.recognition.interimResults = true;
-      this.recognition.lang = 'es-CO';
-      this.recognition.onresult = (event) => this.handleSpeechResult(event);
-      this.recognition.onerror = (event) => {
-        this.error.set(`No se pudo usar el micrófono${event.error ? `: ${event.error}` : '.'}`);
-        this.dictationStatus.set('idle');
-      };
-      this.recognition.onend = () => {
-        if (this.dictationStatus() === 'listening') {
-          this.dictationStatus.set('paused');
-        }
-      };
-    }
-
-    try {
-      this.error.set(null);
-      this.dictationInterimText.set('');
-      this.dictationStatus.set('listening');
-      this.recognition.start();
-    } catch {
-      this.dictationStatus.set('listening');
-    }
-  }
-
-  pauseDictation(): void {
-    if (this.dictationStatus() !== 'listening') return;
-
-    this.dictationStatus.set('paused');
-    this.dictationInterimText.set('');
-    this.recognition?.stop();
-  }
-
-  stopDictation(): void {
-    this.dictationStatus.set('idle');
-    this.dictationInterimText.set('');
-    this.recognition?.stop();
   }
 
   analyzePreparation(): void {
@@ -201,12 +104,12 @@ export class FoodPreparations implements OnInit {
   }
 
   loadPreparationDetail(preparation: FoodPreparation): void {
-    this.loadingDetailId.set(preparation.id);
+    this.loadingPreparationAction.set({ preparationId: preparation.id, action: 'detail' });
     this.error.set(null);
 
     this.foodPreparationService
       .findOne(preparation.id)
-      .pipe(finalize(() => this.loadingDetailId.set(null)))
+      .pipe(finalize(() => this.loadingPreparationAction.set(null)))
       .subscribe({
         next: (detail) => this.selectedPreparation.set(detail),
         error: (error: HttpErrorResponse) => {
@@ -220,12 +123,12 @@ export class FoodPreparations implements OnInit {
   }
 
   editPreparation(preparation: FoodPreparation): void {
-    this.loadingDetailId.set(preparation.id);
+    this.loadingPreparationAction.set({ preparationId: preparation.id, action: 'edit' });
     this.error.set(null);
 
     this.foodPreparationService
       .findOne(preparation.id)
-      .pipe(finalize(() => this.loadingDetailId.set(null)))
+      .pipe(finalize(() => this.loadingPreparationAction.set(null)))
       .subscribe({
         next: (detail) => {
           this.analysisForm = this.normalizePreparationForm(detail);
@@ -238,6 +141,12 @@ export class FoodPreparations implements OnInit {
           this.error.set(this.getBackendErrorMessage(error, 'No se pudo cargar la preparación.'));
         },
       });
+  }
+
+  isPreparationActionLoading(preparationId: number, action: PreparationLoadAction): boolean {
+    const loading = this.loadingPreparationAction();
+
+    return loading?.preparationId === preparationId && loading.action === action;
   }
 
   deactivatePreparation(preparation: FoodPreparation): void {
@@ -271,8 +180,6 @@ export class FoodPreparations implements OnInit {
     this.servings.set(null);
     this.analysisForm = null;
     this.editingPreparationId.set(null);
-    this.dictationInterimText.set('');
-    this.stopDictation();
   }
 
   private loadPreparations(): void {
@@ -290,51 +197,6 @@ export class FoodPreparations implements OnInit {
           );
         },
       });
-  }
-
-  private handleSpeechResult(event: SpeechRecognitionEventLike): void {
-    let finalText = '';
-    let interimText = '';
-
-    for (let index = event.resultIndex; index < event.results.length; index += 1) {
-      const result = event.results[index];
-      const transcript = result[0]?.transcript ?? '';
-
-      if (result.isFinal) {
-        finalText += transcript;
-      } else {
-        interimText += transcript;
-      }
-    }
-
-    if (finalText.trim()) {
-      this.appendDescription(finalText);
-    }
-
-    this.dictationInterimText.set(interimText.trim());
-  }
-
-  private appendDescription(text: string): void {
-    const current = this.description().trim();
-    const addition = text.trim();
-
-    if (!addition) return;
-
-    this.description.set(current ? `${current} ${addition}` : addition);
-  }
-
-  private destroySpeechRecognition(): void {
-    this.dictationStatus.set('idle');
-    this.recognition?.abort();
-    this.recognition = null;
-  }
-
-  private getSpeechRecognitionConstructor(): SpeechRecognitionConstructorLike | null {
-    if (typeof window === 'undefined') return null;
-
-    const speechWindow = window as SpeechWindow;
-
-    return speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition ?? null;
   }
 
   private normalizePreparationForm(preparation: FoodPreparationForm): FoodPreparationForm {

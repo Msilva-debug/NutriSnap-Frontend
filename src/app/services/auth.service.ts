@@ -52,6 +52,10 @@ export class AuthService {
     return !!this.getToken();
   }
 
+  hasValidToken(): boolean {
+    return this.hasToken() && !this.isTokenExpired();
+  }
+
   logout(): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
@@ -64,10 +68,17 @@ export class AuthService {
     const token = this.getToken();
     if (!token) return true;
 
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const expiresAt = payload.exp * 1000;
+    try {
+      const payloadBase64 = token.split('.')[1];
+      if (!payloadBase64) return true;
 
-    return Date.now() >= expiresAt;
+      const payload = JSON.parse(atob(payloadBase64));
+      const expiresAt = Number(payload.exp) * 1000;
+
+      return !Number.isFinite(expiresAt) || Date.now() >= expiresAt;
+    } catch {
+      return true;
+    }
   }
 
   private applyThemeFromLoginResponse(response: LoginResponse): void {

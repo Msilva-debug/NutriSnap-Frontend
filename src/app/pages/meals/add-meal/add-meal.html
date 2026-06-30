@@ -4,7 +4,7 @@
     <header>
       <h1 class="text-3xl font-bold text-gray-800">Registrar comida</h1>
       <p class="mt-1 text-gray-500">
-        Sube una foto y la IA analizará los nutrientes automáticamente
+        Sube una foto o describe exactamente lo que comiste
       </p>
     </header>
 
@@ -18,46 +18,117 @@
               : 'bg-white rounded-2xl shadow-sm border border-gray-100 p-6'
           "
         >
-          <label class="block text-sm font-medium text-gray-700 mb-3">Foto de la comida</label>
+          <div class="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 class="text-lg font-bold text-gray-800">Comida a analizar</h2>
+              <p class="mt-1 text-sm text-gray-500">Elige cómo quieres registrar esta comida.</p>
+            </div>
 
-          @if (!imagePreview()) {
-            <label
-              for="imageInput"
-              class="flex flex-col items-center justify-center w-full h-52 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-accent-400 hover:bg-accent-50 transition-colors"
-            >
-              <svg
-                class="w-10 h-10 text-gray-400 mb-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="1.5"
-                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
-                />
-              </svg>
-              <span class="text-sm text-gray-500">Haz clic para subir una imagen</span>
-              <span class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP</span>
-            </label>
-          } @else {
-            <div class="relative rounded-xl overflow-hidden">
-              <img [src]="imagePreview()" alt="Vista previa" class="w-full max-h-64 object-cover" />
+            <div class="grid w-full max-w-sm grid-cols-2 gap-1 rounded-xl bg-gray-100 p-1">
               <button
-                (click)="reset()"
-                class="absolute top-2 right-2 bg-white/80 hover:bg-white text-gray-600 rounded-full p-1.5 shadow transition-colors cursor-pointer"
+                type="button"
+                (click)="setAnalysisMode('photo')"
+                [class]="
+                  analysisMode() === 'photo'
+                    ? 'flex items-center justify-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-bold text-primary-600 shadow-sm'
+                    : 'flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-gray-500 transition hover:text-gray-700'
+                "
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"
+                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
                   />
                 </svg>
+                Foto
+              </button>
+
+              <button
+                type="button"
+                (click)="setAnalysisMode('text')"
+                [class]="
+                  analysisMode() === 'text'
+                    ? 'flex items-center justify-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-bold text-primary-600 shadow-sm'
+                    : 'flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-gray-500 transition hover:text-gray-700'
+                "
+              >
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 18.75a6 6 0 006-6v-1.5m-12 0v1.5a6 6 0 006 6m0 0v3.75m-3 0h6M12 15a3 3 0 003-3V5.25a3 3 0 00-6 0V12a3 3 0 003 3z"
+                  />
+                </svg>
+                Texto
               </button>
             </div>
+          </div>
+
+          @if (analysisMode() === 'photo') {
+            <div>
+              <div class="mb-2 flex items-center justify-between gap-3">
+                <label class="block text-sm font-semibold text-gray-700">Foto de la comida</label>
+                @if (selectedImage()) {
+                  <span class="w-fit rounded-full bg-primary-50 px-3 py-1 text-xs font-bold text-primary-600">
+                    Foto lista
+                  </span>
+                }
+              </div>
+
+              @if (!imagePreview()) {
+                <label
+                  for="imageInput"
+                  class="flex min-h-72 flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 px-4 text-center transition-colors hover:border-accent-400 hover:bg-accent-50 cursor-pointer"
+                >
+                  <svg
+                    class="w-10 h-10 text-gray-400 mb-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.5"
+                      d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+                    />
+                  </svg>
+                  <span class="text-sm font-semibold text-gray-600">Subir imagen</span>
+                  <span class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP</span>
+                </label>
+              } @else {
+                <div class="relative overflow-hidden rounded-xl bg-gray-100">
+                  <img [src]="imagePreview()" alt="Vista previa" class="h-72 w-full object-cover" />
+                  <button
+                    type="button"
+                    (click)="clearImage()"
+                    class="absolute top-3 right-3 rounded-full bg-white/90 p-2 text-gray-600 shadow transition-colors hover:bg-white cursor-pointer"
+                    aria-label="Quitar foto"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              }
+            </div>
+          } @else {
+            <app-voice-textarea
+              label="Descripción de la comida"
+              placeholder="Ej: almorcé arroz, pechuga asada, ensalada con aguacate y un vaso de jugo."
+              [rows]="7"
+              [value]="mealDescription()"
+              (valueChange)="updateMealDescription($event)"
+              (dictationError)="error.set($event)"
+            />
           }
 
           <input
@@ -80,7 +151,10 @@
                 </p>
               </div>
               @if (isLoadingPreparations()) {
-                <span class="text-xs font-semibold text-gray-400">Cargando...</span>
+                <span class="inline-flex items-center gap-2 text-xs font-semibold text-gray-400">
+                  <app-loading-spinner />
+                  Cargando...
+                </span>
               }
             </div>
 
@@ -91,42 +165,20 @@
             }
 
             @if (preparations().length > 0) {
-              <div class="max-h-[28rem] space-y-3 overflow-y-auto pr-1">
+              <div
+                [class]="
+                  preparations().length > 3
+                    ? 'max-h-[26rem] space-y-3 overflow-y-auto pr-1'
+                    : 'space-y-3'
+                "
+              >
                 @for (preparation of preparations(); track preparation.id) {
-                  <button
-                    type="button"
-                    (click)="selectPreparation(preparation)"
-                    [class]="
-                      selectedPreparation()?.id === preparation.id
-                        ? 'w-full rounded-xl border-2 border-primary-500 bg-primary-50 p-4 text-left transition'
-                        : 'w-full rounded-xl border-2 border-gray-100 p-4 text-left transition hover:border-gray-200'
-                    "
-                  >
-                    <div class="flex items-start justify-between gap-3">
-                      <div>
-                        <p class="font-bold text-gray-800">{{ preparation.name }}</p>
-                        <p class="mt-1 text-xs text-gray-400">{{ preparation.servings }} porciones</p>
-                      </div>
-                      <span class="rounded-full bg-primary-50 px-2.5 py-1 text-xs font-bold text-primary-600">
-                        {{ preparation.caloriesPerServing }} kcal
-                      </span>
-                    </div>
-
-                    <div class="mt-3 grid grid-cols-3 gap-2 text-center">
-                      <div class="rounded-lg bg-blue-50 px-2 py-2">
-                        <p class="text-[11px] font-semibold text-blue-600">Prot.</p>
-                        <p class="text-sm font-bold text-blue-800">{{ preparation.proteinsPerServing }}g</p>
-                      </div>
-                      <div class="rounded-lg bg-orange-50 px-2 py-2">
-                        <p class="text-[11px] font-semibold text-orange-600">Carbos</p>
-                        <p class="text-sm font-bold text-orange-800">{{ preparation.carbsPerServing }}g</p>
-                      </div>
-                      <div class="rounded-lg bg-yellow-50 px-2 py-2">
-                        <p class="text-[11px] font-semibold text-yellow-700">Grasas</p>
-                        <p class="text-sm font-bold text-yellow-800">{{ preparation.fatsPerServing }}g</p>
-                      </div>
-                    </div>
-                  </button>
+                  <app-food-preparation-card
+                    [preparation]="preparation"
+                    [selectable]="true"
+                    [selected]="selectedPreparation()?.id === preparation.id"
+                    (preparationSelected)="selectPreparation($event)"
+                  />
                 }
               </div>
             }
@@ -152,13 +204,14 @@
                     type="button"
                     (click)="registerPreparationAsMeal()"
                     [disabled]="isRegisteringPreparationMeal()"
-                    class="rounded-lg bg-primary-500 px-5 py-2.5 text-sm font-semibold text-primary-contrast transition hover:bg-primary-600 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-500 px-5 py-2.5 text-sm font-semibold text-primary-contrast transition hover:bg-primary-600 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
                   >
-                    {{
-                      isRegisteringPreparationMeal()
-                        ? 'Registrando...'
-                        : 'Registrar preparación como comida'
-                    }}
+                    @if (isRegisteringPreparationMeal()) {
+                      <app-loading-spinner />
+                      Registrando...
+                    } @else {
+                      Registrar preparación como comida
+                    }
                   </button>
                 </div>
               </div>
@@ -216,11 +269,16 @@
 
       <!-- Analyze button -->
       <button
-        (click)="analyzeImage()"
-        [disabled]="!selectedImage() || isAnalyzing()"
-        class="w-full py-3.5 rounded-xl font-semibold text-primary-contrast transition-all bg-primary-500 hover:bg-primary-600 active:scale-95 cursor-pointer disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:scale-100"
+        (click)="analyzeMeal()"
+        [disabled]="!hasMealInput() || isAnalyzing()"
+        class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary-500 py-3.5 font-semibold text-primary-contrast transition-all hover:bg-primary-600 active:scale-95 cursor-pointer disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed disabled:scale-100"
       >
-        Analizar con IA
+        @if (isAnalyzing()) {
+          <app-loading-spinner />
+          Analizando...
+        } @else {
+          Analizar con IA
+        }
       </button>
     </div>
   </div>
@@ -233,17 +291,7 @@
       <div
         class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-50"
       >
-        <svg class="h-8 w-8 animate-spin text-primary-600" fill="none" viewBox="0 0 24 24">
-          <circle
-            class="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            stroke-width="4"
-          ></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-        </svg>
+        <app-loading-spinner size="h-8 w-8" tone="text-primary-600" />
       </div>
       <h2 class="text-lg font-semibold text-gray-900">Analizando comida</h2>
       <p class="mt-2 text-sm text-gray-500">
@@ -351,9 +399,14 @@
         <button
           (click)="saveMeal()"
           [disabled]="isSaving()"
-          class="flex-1 py-3 rounded-xl bg-primary-500 hover:bg-primary-600 disabled:bg-gray-200 disabled:text-gray-400 cursor-pointer disabled:cursor-not-allowed text-primary-contrast font-semibold active:scale-95 disabled:scale-100 transition-all text-sm"
+          class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary-500 py-3 text-sm font-semibold text-primary-contrast transition-all hover:bg-primary-600 active:scale-95 disabled:scale-100 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400 cursor-pointer"
         >
-          Guardar comida
+          @if (isSaving()) {
+            <app-loading-spinner />
+            Guardando...
+          } @else {
+            Guardar comida
+          }
         </button>
       </div>
     </div>
@@ -369,17 +422,7 @@
       <div
         class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-50"
       >
-        <svg class="h-8 w-8 animate-spin text-primary-600" fill="none" viewBox="0 0 24 24">
-          <circle
-            class="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            stroke-width="4"
-          ></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-        </svg>
+        <app-loading-spinner size="h-8 w-8" tone="text-primary-600" />
       </div>
       <h2 class="text-lg font-semibold text-gray-900">Guardando comida</h2>
       <p class="mt-2 text-sm text-gray-500">Estamos registrando tu comida en el sistema.</p>

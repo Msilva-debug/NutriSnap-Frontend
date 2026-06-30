@@ -31,9 +31,10 @@
             type="button"
             (click)="saveTheme()"
             [disabled]="saving() || !hasChanges()"
-            class="inline-flex flex-1 cursor-pointer items-center justify-center rounded-xl bg-primary-500 px-4 py-3 text-sm font-bold text-primary-contrast shadow-md transition hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-60"
+            class="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary-500 px-4 py-3 text-sm font-bold text-primary-contrast shadow-md transition hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
             @if (saving()) {
+              <app-loading-spinner />
               Guardando...
             } @else {
               Guardar cambios
