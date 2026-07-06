@@ -1,5 +1,5 @@
 <div
-  class="min-h-screen bg-gradient-to-br from-primary-50 to-accent-100 flex items-center justify-center p-4"
+  class="min-h-screen bg-gray-50 flex items-center justify-center p-4"
 >
   <div class="w-full max-w-md">
     <!-- Logo / Título -->
@@ -9,12 +9,12 @@
       >
         <app-rabbit-icon size="md" />
       </div>
-      <h1 class="text-3xl font-bold text-gray-800">CalorieTrack</h1>
+      <h1 class="text-3xl font-bold text-gray-950">CalorieTrack</h1>
       <p class="text-gray-500 mt-1">Controla tu nutrición diaria</p>
     </div>
 
     <!-- Card -->
-    <div class="bg-white rounded-2xl shadow-xl p-8">
+    <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
       <h2 class="text-xl font-semibold text-gray-700 mb-6">Iniciar sesión</h2>
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
@@ -28,7 +28,7 @@
             type="email"
             formControlName="email"
             placeholder="tu@correo.com"
-            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition"
+            class="w-full px-4 py-3 min-h-11 rounded-lg border border-gray-200 focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100 transition"
             [class.border-red-400]="email.invalid && email.touched"
           />
           @if (email.invalid && email.touched) {
@@ -52,7 +52,7 @@
             type="password"
             formControlName="password"
             placeholder="••••••••"
-            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition"
+            class="w-full px-4 py-3 min-h-11 rounded-lg border border-gray-200 focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100 transition"
             [class.border-red-400]="password.invalid && password.touched"
           />
           @if (password.invalid && password.touched) {
@@ -71,7 +71,7 @@
         <button
           type="submit"
           [disabled]="loading()"
-          class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary-500 px-4 py-3 font-semibold text-primary-contrast shadow-md transition hover:bg-primary-600 disabled:opacity-60 cursor-pointer"
+          class="inline-flex w-full items-center justify-center gap-2 min-h-11 rounded-lg bg-primary-500 px-4 py-3 font-semibold text-primary-contrast shadow-md transition hover:bg-primary-600 disabled:opacity-60 cursor-pointer"
         >
           @if (loading()) {
             <app-loading-spinner />
@@ -95,7 +95,7 @@
 
 @if (showSessionExpiredModal()) {
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-    <div class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+    <div class="w-full max-w-sm rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
       <h2 class="text-lg font-semibold text-gray-800">Sesión expirada</h2>
       <p class="mt-2 text-sm text-gray-500">
         Tu sesión expiró. Inicia sesión nuevamente para continuar.
@@ -103,7 +103,7 @@
       <button
         type="button"
         (click)="this.showSessionExpiredModal.set(false)"
-        class="cursor-pointer mt-5 w-full rounded-xl bg-primary-900 px-4 py-3 font-semibold text-white transition hover:bg-primary-600"
+        class="cursor-pointer mt-5 w-full min-h-11 rounded-lg bg-primary-500 px-4 py-3 font-semibold text-white transition hover:bg-primary-600"
       >
         Entendido
       </button>
