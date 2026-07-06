@@ -4,12 +4,15 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
 import { LoadingSpinner } from '../../components/loading-spinner/loading-spinner';
-import { MealMacroDetail, MealMacroSummary } from '../../components/meal-macro-summary/meal-macro-summary';
+import {
+  MealMacroDetail,
+  MealMacroSummary,
+} from '../../components/meal-macro-summary/meal-macro-summary';
 import { NutrientOverageAlert } from '../../components/nutrient-overage-alert/nutrient-overage-alert';
 import { Meal } from '../../models/meal.model';
 import { MealStateService } from '../../services/meal-state.service';
 import { NutritionPlanStateService } from '../../services/nutrition-plan-state.service';
-import { getMealTypeLabel, MEAL_TYPE_OPTIONS } from '../../utils/meal-types.util';
+import { getMealTypeIcon, getMealTypeLabel, MEAL_TYPE_OPTIONS } from '../../utils/meal-types.util';
 
 interface MacroStat {
   label: string;
@@ -43,12 +46,14 @@ export class Dashboard implements OnInit {
   mealActionError = signal<string | null>(null);
   readonly mealTypeOptions = MEAL_TYPE_OPTIONS;
 
-  todayDate = signal(new Date().toLocaleDateString('es-ES', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }));
+  todayDate = signal(
+    new Date().toLocaleDateString('es-ES', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }),
+  );
 
   private readonly fallbackCalorieGoal = 2000;
 
@@ -64,15 +69,21 @@ export class Dashboard implements OnInit {
   }
 
   get totalProteins() {
-    return this.roundMacro(this.meals().reduce((sum, meal) => sum + this.getMealMacro(meal.proteins), 0));
+    return this.roundMacro(
+      this.meals().reduce((sum, meal) => sum + this.getMealMacro(meal.proteins), 0),
+    );
   }
 
   get totalCarbs() {
-    return this.roundMacro(this.meals().reduce((sum, meal) => sum + this.getMealMacro(meal.carbs), 0));
+    return this.roundMacro(
+      this.meals().reduce((sum, meal) => sum + this.getMealMacro(meal.carbs), 0),
+    );
   }
 
   get totalFats() {
-    return this.roundMacro(this.meals().reduce((sum, meal) => sum + this.getMealMacro(meal.fats), 0));
+    return this.roundMacro(
+      this.meals().reduce((sum, meal) => sum + this.getMealMacro(meal.fats), 0),
+    );
   }
 
   get calorieGoal() {
@@ -108,7 +119,7 @@ export class Dashboard implements OnInit {
         percentage: this.getPercentage(this.totalProteins, proteinGoal),
         progress: this.getProgressPercentage(this.totalProteins, proteinGoal),
         overage: this.getOverage(this.totalProteins, proteinGoal),
-        fillClass: 'bg-primary-100',
+        fillClass: 'bg-primary-500',
       },
       {
         label: 'Carbohidratos',
@@ -117,7 +128,7 @@ export class Dashboard implements OnInit {
         percentage: this.getPercentage(this.totalCarbs, carbsGoal),
         progress: this.getProgressPercentage(this.totalCarbs, carbsGoal),
         overage: this.getOverage(this.totalCarbs, carbsGoal),
-        fillClass: 'bg-primary-200',
+        fillClass: 'bg-secondary-600',
       },
       {
         label: 'Grasas',
@@ -126,7 +137,7 @@ export class Dashboard implements OnInit {
         percentage: this.getPercentage(this.totalFats, fatsGoal),
         progress: this.getProgressPercentage(this.totalFats, fatsGoal),
         overage: this.getOverage(this.totalFats, fatsGoal),
-        fillClass: 'bg-accent-500',
+        fillClass: 'bg-accent-600',
       },
     ];
   }
@@ -140,7 +151,7 @@ export class Dashboard implements OnInit {
       {} as Record<Meal['type'], Meal[]>,
     );
 
-    this.meals().forEach(meal => {
+    this.meals().forEach((meal) => {
       types[meal.type]?.push(meal);
     });
     return types;
@@ -192,6 +203,10 @@ export class Dashboard implements OnInit {
     return getMealTypeLabel(type);
   }
 
+  getMealTypeIcon(type: Meal['type']): string {
+    return getMealTypeIcon(type);
+  }
+
   getMealMacroDetails(meal: Meal): MealMacroDetail[] {
     const macros = [
       {
@@ -202,12 +217,12 @@ export class Dashboard implements OnInit {
       {
         label: 'Carbohidratos',
         value: this.getMealMacro(meal.carbs),
-        fillClass: 'bg-primary-300',
+        fillClass: 'bg-secondary-600',
       },
       {
         label: 'Grasas',
         value: this.getMealMacro(meal.fats),
-        fillClass: 'bg-secondary-600',
+        fillClass: 'bg-accent-600',
       },
     ];
     const totalMacros = macros.reduce((sum, macro) => sum + macro.value, 0);

@@ -61,7 +61,8 @@ export class Recommendations implements OnInit {
     {
       category: 'Energía',
       title: 'Distribuye tus calorías',
-      description: 'Intenta repartir tu consumo durante el día para evitar llegar con demasiada hambre.',
+      description:
+        'Intenta repartir tu consumo durante el día para evitar llegar con demasiada hambre.',
     },
   ];
   readonly filterMode = signal<RecommendationPeriod>('daily');
@@ -139,18 +140,16 @@ export class Recommendations implements OnInit {
   });
 
   ngOnInit(): void {
-    this.route.queryParamMap
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((params) => {
-        const date = params.get('date');
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      const date = params.get('date');
 
-        if (date && this.isValidInputDate(date)) {
-          this.filterMode.set('daily');
-          this.selectedDate.set(date);
-        }
+      if (date && this.isValidInputDate(date)) {
+        this.filterMode.set('daily');
+        this.selectedDate.set(date);
+      }
 
-        this.loadRecommendations();
-      });
+      this.loadRecommendations();
+    });
   }
 
   setFilterMode(mode: RecommendationPeriod): void {
@@ -190,6 +189,26 @@ export class Recommendations implements OnInit {
 
     this.rangeEndDate.set(date);
     this.loadRecommendations();
+  }
+
+  getRecommendationTone(index: number): string {
+    const tones = [
+      'bg-primary-50 text-primary-700',
+      'bg-secondary-50 text-secondary-800',
+      'bg-accent-100 text-accent-800',
+    ];
+
+    return tones[index % tones.length];
+  }
+
+  getComparisonTone(index: number): string {
+    const tones = [
+      'bg-primary-50 text-primary-700',
+      'bg-yellow-50 text-yellow-700',
+      'bg-secondary-50 text-secondary-800',
+    ];
+
+    return tones[index % tones.length];
   }
 
   private loadRecommendations(): void {
@@ -236,7 +255,9 @@ export class Recommendations implements OnInit {
       .filter((point): point is RecommendationItem => point !== null);
   }
 
-  private normalizeComparisonPoint(point: RecommendationComparisonPoint): RecommendationItem | null {
+  private normalizeComparisonPoint(
+    point: RecommendationComparisonPoint,
+  ): RecommendationItem | null {
     if (typeof point === 'string') {
       const description = point.trim();
 
@@ -280,11 +301,7 @@ export class Recommendations implements OnInit {
     const [year, month, day] = value.split('-').map(Number);
     const date = new Date(year, month - 1, day);
 
-    return (
-      date.getFullYear() === year &&
-      date.getMonth() === month - 1 &&
-      date.getDate() === day
-    );
+    return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
   }
 
   private getRecommendationsErrorMessage(error: HttpErrorResponse): string {
@@ -306,5 +323,4 @@ export class Recommendations implements OnInit {
 
     return `${today.getFullYear()}-${month}-${day}`;
   }
-
 }
