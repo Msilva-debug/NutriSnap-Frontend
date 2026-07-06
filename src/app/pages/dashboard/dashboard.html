@@ -1,381 +1,271 @@
-<div class="min-h-full bg-gray-50">
-  <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-5 sm:px-6 lg:px-8">
-    <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div class="min-w-0">
-        <p class="text-sm font-semibold text-primary-600">Dashboard</p>
-        <h1 class="mt-1 text-3xl font-bold text-gray-950">Panel de calorías</h1>
-        <p class="mt-2 text-sm capitalize text-gray-500">{{ todayDate() }}</p>
-      </div>
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-6xl mx-auto">
 
-      <a
-        routerLink="/meals/add"
-        class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-2.5 text-sm font-semibold text-primary-contrast shadow-sm transition hover:bg-primary-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 cursor-pointer"
-      >
-        <span class="text-lg leading-none" aria-hidden="true">+</span>
-        Agregar comida
-      </a>
-    </header>
+    <!-- Encabezado -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-800">📊 Panel de calorías</h1>
+      <p class="text-gray-500 mt-1 capitalize">{{ todayDate() }}</p>
+    </div>
 
-    <section class="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.8fr)_minmax(320px,0.9fr)]">
-      <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-        <div class="flex flex-col gap-6 p-5 sm:p-6 lg:flex-row lg:items-start lg:justify-between">
-          <div class="min-w-0 flex-1">
-            <div class="mb-4 flex items-start justify-between gap-3">
-              <div>
-                <p class="text-sm font-semibold text-gray-500">Consumo de hoy</p>
-                <div class="mt-2 flex flex-wrap items-end gap-x-3 gap-y-1">
-                  <span class="text-5xl font-bold leading-none text-gray-950">{{
-                    totalCalories
-                  }}</span>
-                  <span class="pb-1 text-lg font-semibold text-gray-400"
-                    >/ {{ calorieGoal }} kcal</span
-                  >
-                </div>
-              </div>
+    <!-- Resumen diario (tarjeta grande de calorías) -->
+    <div class="mb-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Tarjeta principal de calorías -->
+      <div class="lg:col-span-2 bg-gradient-to-br from-primary-500 to-accent-600 rounded-2xl shadow-lg p-8 text-primary-contrast">
+        <div class="mb-4 flex items-start justify-between gap-3">
+          <h2 class="text-lg font-semibold">Consumo de hoy</h2>
 
-              @if (calorieOverage > 0) {
-                <app-nutrient-overage-alert
-                  nutrient="calorías"
-                  [amount]="calorieOverage"
-                  unit=" kcal"
-                />
-              }
-            </div>
-
-            <div
-              class="relative h-4 w-full overflow-hidden rounded-full bg-gray-100 ring-1 ring-gray-200"
-              role="progressbar"
-              [attr.aria-valuenow]="calorieProgressPercentage"
-              aria-valuemin="0"
-              aria-valuemax="100"
-            >
-              <div
-                class="h-full rounded-full bg-primary-500 transition-all duration-500 ease-out"
-                [style.width.%]="calorieProgressPercentage"
-              ></div>
-            </div>
-
-            <div class="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm">
-              <span class="font-semibold text-primary-700">
-                {{ Math.round(calorieProgressPercentage) }}% de la meta
-              </span>
-
-              @if (calorieOverage === 0) {
-                <span class="text-gray-500">{{ remainingCalories }} kcal disponibles</span>
-              } @else {
-                <span class="font-semibold text-yellow-700"
-                  >{{ calorieOverage }} kcal sobre la meta</span
-                >
-              }
-            </div>
-          </div>
-
-          <div
-            class="grid shrink-0 grid-cols-3 gap-px overflow-hidden rounded-lg border border-gray-200 bg-gray-200 lg:w-72"
-          >
-            <div class="bg-white p-3">
-              <p class="text-xs font-medium text-gray-500">Consumido</p>
-              <p class="mt-1 text-lg font-bold text-gray-950">{{ totalCalories }}</p>
-            </div>
-            <div class="bg-white p-3">
-              <p class="text-xs font-medium text-gray-500">Meta</p>
-              <p class="mt-1 text-lg font-bold text-gray-950">{{ calorieGoal }}</p>
-            </div>
-            <div class="bg-white p-3">
-              <p class="text-xs font-medium text-gray-500">
-                @if (calorieOverage > 0) {
-                  Exceso
-                } @else {
-                  Restante
-                }
-              </p>
-              <p
-                class="mt-1 text-lg font-bold"
-                [ngClass]="calorieOverage > 0 ? 'text-yellow-700' : 'text-primary-700'"
-              >
-                {{ calorieOverage > 0 ? calorieOverage : remainingCalories }}
-              </p>
-            </div>
-          </div>
+          @if (calorieOverage > 0) {
+            <app-nutrient-overage-alert
+              nutrient="calorías"
+              [amount]="calorieOverage"
+              unit=" kcal"
+            />
+          }
         </div>
 
-        <div class="border-t border-gray-100 px-5 py-5 sm:px-6">
-          <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
-            @for (macro of macroStats; track macro.label) {
-              <div class="min-w-0">
-                <div class="mb-2 flex items-start justify-between gap-3">
-                  <div class="min-w-0">
-                    <p class="truncate text-sm font-semibold text-gray-700">{{ macro.label }}</p>
-                    <p class="mt-1 text-2xl font-bold leading-tight text-gray-950">
-                      {{ Math.round(macro.consumed) }}g
-                    </p>
-                  </div>
+        <div class="mb-6">
+          <div class="flex items-end justify-between mb-3">
+            <span class="text-5xl font-bold">{{ totalCalories }}</span>
+            <span class="text-2xl text-primary-100">/ {{ calorieGoal }} kcal</span>
+          </div>
 
-                  @if (macro.overage > 0) {
-                    <app-nutrient-overage-alert
-                      [nutrient]="macro.label.toLowerCase()"
-                      [amount]="Math.round(macro.overage)"
-                      unit="g"
-                    />
-                  } @else {
-                    <span
-                      class="rounded-full bg-secondary-50 px-2.5 py-1 text-xs font-semibold text-secondary-800"
-                    >
-                      {{ Math.round(macro.percentage) }}%
-                    </span>
-                  }
-                </div>
+          <!-- Barra de progreso -->
+          <div
+            class="relative w-full bg-primary-900/35 rounded-full h-5 overflow-hidden ring-1 ring-primary-100/30"
+            role="progressbar"
+            [attr.aria-valuenow]="calorieProgressPercentage"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            <div
+              class="bg-primary-100 h-full rounded-full transition-all duration-500 ease-out shadow-sm"
+              [style.width.%]="calorieProgressPercentage"
+            ></div>
+            <span class="absolute inset-0 flex items-center justify-center text-[11px] font-semibold text-primary-contrast drop-shadow-sm">
+              {{ Math.round(calorieProgressPercentage) }}%
+            </span>
+          </div>
 
-                <div
-                  class="h-2.5 w-full overflow-hidden rounded-full bg-gray-100"
-                  role="progressbar"
-                  [attr.aria-label]="macro.label"
-                  [attr.aria-valuenow]="macro.progress"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                >
-                  <div
-                    class="h-full rounded-full transition-all duration-500 ease-out"
-                    [ngClass]="macro.fillClass"
-                    [style.width.%]="macro.progress"
-                  ></div>
-                </div>
-
-                <p class="mt-2 text-xs text-gray-500">Meta {{ macro.goal }}g</p>
-              </div>
+          <div class="mt-3">
+            @if (calorieOverage === 0) {
+              <p class="text-primary-100 text-sm">
+                Puedes comer {{ remainingCalories }} kcal más hoy
+              </p>
             }
           </div>
         </div>
-      </div>
 
-      <aside class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-        <div class="mb-5 flex items-start justify-between gap-3">
-          <div>
-            <p class="text-sm font-semibold text-gray-500">Distribución</p>
-            <h2 class="mt-1 text-xl font-bold text-gray-950">Por tipo de comida</h2>
-          </div>
-          <span class="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700">
-            {{ meals().length }} comidas
-          </span>
-        </div>
-
-        <div class="space-y-4">
-          @for (option of mealTypeOptions; track option.value) {
-            <div>
-              <div class="mb-2 flex items-center justify-between gap-3">
-                <div class="flex min-w-0 items-center gap-3">
-                  <span
-                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary-50 text-lg"
-                    aria-hidden="true"
-                  >
-                    {{ option.icon }}
-                  </span>
-                  <span class="truncate text-sm font-semibold text-gray-700">{{
-                    option.label
-                  }}</span>
+        <!-- Estadísticas rápidas -->
+        <div class="flex flex-col gap-4 pt-4 border-t border-white border-opacity-30 sm:flex-row">
+          @for (macro of macroStats; track macro.label) {
+            <div class="min-w-0 flex-1">
+              <div class="mb-2 flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <p class="truncate text-xs text-primary-100">{{ macro.label }}</p>
+                  <p class="text-2xl font-bold leading-tight">{{ Math.round(macro.consumed) }}g</p>
                 </div>
-                <span class="shrink-0 text-sm font-bold text-gray-950">
-                  {{ getCaloriesByType(option.value) }} kcal
-                </span>
+                @if (macro.overage > 0) {
+                  <app-nutrient-overage-alert
+                    [nutrient]="macro.label.toLowerCase()"
+                    [amount]="Math.round(macro.overage)"
+                    unit="g"
+                  />
+                } @else {
+                  <span class="shrink-0 text-xs font-semibold text-primary-100">
+                    {{ Math.round(macro.progress) }}%
+                  </span>
+                }
               </div>
 
-              <div class="h-2 w-full overflow-hidden rounded-full bg-gray-100">
+              <div
+                class="h-2 w-full overflow-hidden rounded-full bg-primary-900/35 ring-1 ring-primary-100/25"
+                role="progressbar"
+                [attr.aria-label]="macro.label"
+                [attr.aria-valuenow]="macro.progress"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              >
                 <div
-                  class="h-full rounded-full bg-accent-600 transition-all duration-500"
-                  [style.width.%]="
-                    totalCalories > 0 ? (getCaloriesByType(option.value) / totalCalories) * 100 : 0
-                  "
+                  class="h-full rounded-full transition-all duration-500 ease-out"
+                  [ngClass]="macro.fillClass"
+                  [style.width.%]="macro.progress"
                 ></div>
               </div>
+
+              <p class="mt-1 text-[11px] text-primary-100">
+                Meta {{ macro.goal }}g
+              </p>
             </div>
           }
         </div>
-      </aside>
-    </section>
-
-    <section class="rounded-lg border border-gray-200 bg-white shadow-sm">
-      <div
-        class="flex flex-col gap-4 border-b border-gray-100 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6"
-      >
-        <div>
-          <p class="text-sm font-semibold text-gray-500">Registro diario</p>
-          <h2 class="mt-1 text-xl font-bold text-gray-950">Comidas registradas</h2>
-        </div>
-
-        <span
-          class="inline-flex w-fit items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-600"
-        >
-          {{ meals().length }} en total
-        </span>
       </div>
 
-      <div class="p-5 sm:p-6">
-        @if (mealActionError()) {
-          <p
-            class="mb-4 rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
-          >
-            {{ mealActionError() }}
-          </p>
-        }
-
-        @if (isLoadingMeals()) {
-          <div
-            class="flex min-h-60 flex-col items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 px-4 py-12 text-center text-gray-500"
-          >
-            <app-loading-spinner size="mb-4 h-9 w-9" tone="text-primary-500" />
-            <p class="font-semibold text-gray-700">Cargando comidas de hoy</p>
-            <p class="mt-1 text-sm text-gray-500">Estamos preparando el resumen actualizado.</p>
-          </div>
-        } @else if (mealsError()) {
-          <div
-            class="flex min-h-60 flex-col items-center justify-center rounded-lg border border-red-100 bg-red-50 px-4 py-12 text-center"
-          >
-            <p class="max-w-md text-sm font-medium text-red-700">{{ mealsError() }}</p>
-            <button
-              type="button"
-              (click)="loadTodayMeals()"
-              class="mt-5 inline-flex min-h-10 items-center justify-center rounded-lg bg-primary-500 px-5 py-2 text-sm font-semibold text-primary-contrast transition hover:bg-primary-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 cursor-pointer"
-            >
-              Reintentar
-            </button>
-          </div>
-        } @else if (meals().length === 0) {
-          <div
-            class="flex min-h-60 flex-col items-center justify-center rounded-lg border border-dashed border-primary-200 bg-primary-50 px-4 py-12 text-center"
-          >
-            <div
-              class="flex h-12 w-12 items-center justify-center rounded-full bg-white text-2xl shadow-sm"
-              aria-hidden="true"
-            >
-              +
+      <!-- Tarjeta de desglose por comida -->
+      <div class="bg-white rounded-2xl shadow-md p-6">
+        <h3 class="font-semibold text-gray-800 mb-4">Desglose</h3>
+        <div class="space-y-3">
+          @for (option of mealTypeOptions; track option.value) {
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span>{{ option.icon }}</span>
+                <span class="text-sm text-gray-600">{{ option.label }}</span>
+              </div>
+              <span class="font-semibold text-gray-800">
+                {{ getCaloriesByType(option.value) }} kcal
+              </span>
             </div>
-            <p class="mt-4 text-lg font-bold text-gray-950">Aún no hay comidas registradas</p>
-            <p class="mt-2 max-w-md text-sm text-gray-600">
-              Agrega tu primera comida del día para ver calorías, macros y distribución.
-            </p>
-            <a
-              routerLink="/meals/add"
-              class="mt-5 inline-flex min-h-10 items-center justify-center rounded-lg bg-primary-500 px-5 py-2 text-sm font-semibold text-primary-contrast transition hover:bg-primary-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 cursor-pointer"
-            >
-              Agregar primera comida
-            </a>
-          </div>
-        } @else {
-          <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
-            @for (meal of meals(); track meal.id ?? $index) {
-              <article
-                class="flex min-w-0 overflow-hidden rounded-lg border border-gray-200 bg-white transition hover:border-primary-200 hover:bg-gray-50"
-              >
-                <button
-                  type="button"
-                  (click)="openMealModal(meal)"
-                  class="flex min-w-0 flex-1 items-center gap-4 p-4 text-left transition cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-400"
-                >
-                  <span
-                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-secondary-50 text-xl"
-                    aria-hidden="true"
-                  >
-                    {{ getMealTypeIcon(meal.type) }}
-                  </span>
-
-                  <span class="min-w-0 flex-1">
-                    <span class="block truncate font-semibold text-gray-950">{{ meal.name }}</span>
-                    <span
-                      class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500"
-                    >
-                      <span>{{ getMealTypeLabel(meal.type) }}</span>
-                      <span>{{ getMealTime(meal) }}</span>
-                    </span>
-                  </span>
-
-                  <span
-                    class="shrink-0 rounded-full bg-primary-50 px-3 py-1 text-sm font-bold text-primary-700"
-                  >
-                    {{ meal.calories }} kcal
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  (click)="$event.stopPropagation(); deleteMeal(meal.id)"
-                  [disabled]="!meal.id || isDeletingMeal(meal.id)"
-                  class="flex w-12 shrink-0 items-center justify-center border-l border-gray-100 text-red-500 transition hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
-                  [attr.aria-label]="'Eliminar ' + meal.name"
-                >
-                  @if (isDeletingMeal(meal.id)) {
-                    <app-loading-spinner />
-                  } @else {
-                    <span aria-hidden="true">×</span>
-                  }
-                </button>
-              </article>
-            }
-          </div>
-        }
+          }
+        </div>
       </div>
-    </section>
+    </div>
+
+    <!-- Listado de comidas -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-lg font-semibold text-gray-800">🍴 Comidas registradas</h3>
+        <a
+          routerLink="/meals/add"
+          class="bg-primary-500 hover:bg-primary-600 text-primary-contrast font-semibold py-2 px-4 rounded-lg transition cursor-pointer"
+        >
+          + Agregar comida
+        </a>
+      </div>
+
+      @if (mealActionError()) {
+        <p class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+          {{ mealActionError() }}
+        </p>
+      }
+
+      @if (isLoadingMeals()) {
+        <div class="flex flex-col items-center justify-center py-12 text-gray-500">
+          <app-loading-spinner size="mb-4 h-8 w-8" tone="text-primary-500" />
+          <p>Cargando comidas de hoy...</p>
+        </div>
+      } @else if (mealsError()) {
+        <div class="text-center py-12">
+          <p class="text-red-500 mb-4">{{ mealsError() }}</p>
+          <button
+            type="button"
+            (click)="loadTodayMeals()"
+            class="bg-primary-500 hover:bg-primary-600 text-primary-contrast font-semibold py-2 px-6 rounded-lg transition cursor-pointer"
+          >
+            Reintentar
+          </button>
+        </div>
+      } @else if (meals().length === 0) {
+        <div class="text-center py-12">
+          <p class="text-gray-400 mb-4">No hay comidas registradas aún.</p>
+          <a
+            routerLink="/meals/add"
+            class="inline-block bg-primary-500 hover:bg-primary-600 text-primary-contrast font-semibold py-2 px-6 rounded-lg transition"
+          >
+            Agregar tu primera comida
+          </a>
+        </div>
+      } @else {
+        <div class="space-y-3">
+          @for (meal of meals(); track meal.id ?? $index) {
+            <div class="flex items-stretch overflow-hidden border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+              <button
+                type="button"
+                (click)="openMealModal(meal)"
+                class="flex min-w-0 flex-1 items-center justify-between p-4 text-left transition cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-400"
+              >
+                <div class="min-w-0 flex-1">
+                  <p class="truncate font-medium text-gray-800">{{ meal.name }}</p>
+                  <div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500">
+                    <span>⏰ {{ getMealTime(meal) }}</span>
+                    <span class="text-primary-600 font-semibold">{{ meal.calories }} kcal</span>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                (click)="$event.stopPropagation(); deleteMeal(meal.id)"
+                [disabled]="!meal.id || isDeletingMeal(meal.id)"
+                class="min-w-12 px-4 text-red-500 hover:bg-red-50 hover:text-red-700 font-semibold transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                aria-label="Eliminar comida"
+              >
+                @if (isDeletingMeal(meal.id)) {
+                  <app-loading-spinner />
+                } @else {
+                  ✕
+                }
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
   </div>
 </div>
 
 @if (selectedMeal(); as meal) {
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 p-4"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 p-4"
     (click)="closeMealModal()"
   >
     <div
-      class="app-scrollbar max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white shadow-2xl"
+      class="app-scrollbar max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl"
       role="dialog"
       aria-modal="true"
       aria-labelledby="meal-detail-title"
       (click)="$event.stopPropagation()"
     >
-      <div class="flex items-start justify-between gap-4 border-b border-gray-100 p-5 sm:p-6">
+      <div class="flex items-start justify-between gap-4 border-b border-gray-100 p-5">
         <div class="min-w-0">
           <p class="text-sm font-semibold text-primary-600">
             {{ getMealTypeLabel(meal.type) }}
           </p>
-          <h2 id="meal-detail-title" class="mt-1 truncate text-2xl font-bold text-gray-950">
+          <h2 id="meal-detail-title" class="mt-1 truncate text-2xl font-bold text-gray-900">
             {{ meal.name }}
           </h2>
-          <p class="mt-2 text-sm capitalize text-gray-500">
-            {{ getMealDate(meal) }} · {{ getMealTime(meal) }}
+          <p class="mt-1 text-sm capitalize text-gray-500">
+            {{ getMealDate(meal) }} - {{ getMealTime(meal) }}
           </p>
         </div>
 
         <button
           type="button"
           (click)="closeMealModal()"
-          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 cursor-pointer"
+          class="rounded-lg px-3 py-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-800 cursor-pointer"
           aria-label="Cerrar detalle de comida"
         >
-          <span aria-hidden="true">×</span>
+          ✕
         </button>
       </div>
 
-      <div class="space-y-6 p-5 sm:p-6">
-        <div class="rounded-lg border border-primary-100 bg-primary-50 p-5">
-          <p class="text-sm font-semibold text-primary-700">Calorías registradas</p>
-          <p class="mt-2 text-4xl font-bold text-primary-800">{{ meal.calories }} kcal</p>
+      <div class="space-y-5 p-5">
+        <div class="rounded-xl bg-primary-50 p-4">
+          <p class="text-sm font-medium text-primary-700">Calorías</p>
+          <p class="mt-1 text-4xl font-bold text-primary-700">{{ meal.calories }} kcal</p>
         </div>
 
         <div>
-          <h3 class="mb-3 text-sm font-semibold text-gray-500">Macronutrientes</h3>
+          <h3 class="mb-3 text-sm font-semibold uppercase text-gray-500">Macronutrientes</h3>
           <app-meal-macro-summary [macros]="getMealMacroDetails(meal)" />
         </div>
 
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div class="rounded-lg border border-gray-200 p-4">
+          <div class="rounded-xl border border-gray-200 p-4">
             <p class="text-xs font-medium text-gray-500">Registrada</p>
-            <p class="mt-1 text-sm font-semibold capitalize text-gray-900">
-              {{ getMealDate(meal) }}
-            </p>
+            <p class="mt-1 text-sm font-semibold capitalize text-gray-800">{{ getMealDate(meal) }}</p>
           </div>
-          <div class="rounded-lg border border-gray-200 p-4">
+          <div class="rounded-xl border border-gray-200 p-4">
             <p class="text-xs font-medium text-gray-500">Hora</p>
-            <p class="mt-1 text-sm font-semibold text-gray-900">{{ getMealTime(meal) }}</p>
+            <p class="mt-1 text-sm font-semibold text-gray-800">{{ getMealTime(meal) }}</p>
           </div>
         </div>
       </div>
     </div>
   </div>
 }
+
+<!-- Para usar Math en template -->
+<div style="display: none;">
+  {{ Math.abs(0) }}
+  {{ Math.round(0) }}
+</div>

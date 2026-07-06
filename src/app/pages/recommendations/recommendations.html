@@ -1,16 +1,101 @@
-<div class="min-h-full bg-gray-50">
-  <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-5 sm:px-6 lg:px-8">
-    <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-      <div class="min-w-0">
-        <p class="text-sm font-semibold text-primary-600">Nutrición inteligente</p>
-        <h1 class="mt-1 text-3xl font-bold text-gray-950">Recomendaciones</h1>
-        <p class="mt-2 text-sm capitalize text-gray-500">
-          Lectura nutricional para {{ filterLabel() }}
-        </p>
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="mx-auto max-w-6xl">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-800">💡 Recomendaciones</h1>
+      <p class="mt-1 text-gray-500">
+        Recomendaciones para {{ filterLabel() }}
+      </p>
+    </div>
+
+    <section class="mb-6 rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p class="mb-2 text-sm font-semibold text-gray-700">Periodo</p>
+          <div
+            class="inline-grid grid-cols-2 gap-1 rounded-lg bg-gray-100 p-1"
+            role="radiogroup"
+            aria-label="Periodo de recomendaciones"
+          >
+            @for (mode of filterModes; track mode.value) {
+              <button
+                type="button"
+                role="radio"
+                [attr.aria-checked]="filterMode() === mode.value"
+                (click)="setFilterMode(mode.value)"
+                [class]="
+                  filterMode() === mode.value
+                    ? 'rounded-md bg-white px-4 py-2 text-sm font-semibold text-primary-700 shadow-sm'
+                    : 'rounded-md px-4 py-2 text-sm font-semibold text-gray-500 hover:text-gray-700'
+                "
+              >
+                {{ mode.label }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="grid flex-1 gap-3 sm:grid-cols-2 lg:max-w-xl">
+          @if (filterMode() === 'daily') {
+            <label class="block">
+              <span class="text-sm font-semibold text-gray-700">Fecha</span>
+              <input
+                type="date"
+                [value]="selectedDate()"
+                (change)="updateSelectedDate($event)"
+                class="mt-2 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
+              />
+            </label>
+          }
+
+          @if (filterMode() === 'range') {
+            <label class="block">
+              <span class="text-sm font-semibold text-gray-700">Desde</span>
+              <input
+                type="date"
+                [value]="rangeStartDate()"
+                (change)="updateRangeStartDate($event)"
+                class="mt-2 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
+              />
+            </label>
+
+            <label class="block">
+              <span class="text-sm font-semibold text-gray-700">Hasta</span>
+              <input
+                type="date"
+                [value]="rangeEndDate()"
+                (change)="updateRangeEndDate($event)"
+                class="mt-2 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
+              />
+            </label>
+          }
+        </div>
       </div>
 
+      <div class="mt-4 rounded-lg border border-primary-100 bg-primary-50 px-4 py-3">
+        <p class="text-xs font-bold uppercase text-primary-600">Filtro activo</p>
+        <p class="mt-1 text-sm font-semibold capitalize text-gray-700">{{ filterLabel() }}</p>
+      </div>
+
+      @if (rangeError()) {
+        <p class="mt-3 text-sm font-medium text-red-600">{{ rangeError() }}</p>
+      }
+    </section>
+
+    @if (recommendationsError()) {
+      <div class="mb-4 rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+        {{ recommendationsError() }}
+      </div>
+    }
+
+    @if (recommendationsSummary()) {
+      <div class="mb-4 rounded-lg border border-primary-100 bg-primary-50 px-4 py-3">
+        <p class="text-sm font-semibold text-primary-700">{{ recommendationsSummary() }}</p>
+      </div>
+    }
+
+    <div class="mb-4 flex justify-start">
       <div
-        class="inline-grid w-full grid-cols-2 gap-1 rounded-lg bg-gray-100 p-1 sm:w-auto"
+        class="inline-grid grid-cols-2 gap-1 rounded-lg bg-gray-100 p-1"
         role="radiogroup"
         aria-label="Vista de recomendaciones"
       >
@@ -22,289 +107,104 @@
             (click)="setSelectedView(view.value)"
             [class]="
               selectedView() === view.value
-                ? 'min-h-10 rounded-md bg-white px-4 py-2 text-sm font-semibold text-primary-700 shadow-sm transition cursor-pointer'
-                : 'min-h-10 rounded-md px-4 py-2 text-sm font-semibold text-gray-500 transition hover:text-gray-800 cursor-pointer'
+                ? 'rounded-md bg-white px-4 py-2 text-sm font-semibold text-primary-700 shadow-sm'
+                : 'rounded-md px-4 py-2 text-sm font-semibold text-gray-500 hover:text-gray-700'
             "
           >
             {{ view.label }}
           </button>
         }
       </div>
-    </header>
-
-    <section class="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.7fr)]">
-      <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-        <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-          <div class="min-w-0">
-            <p class="text-sm font-semibold text-gray-500">Periodo de análisis</p>
-            <div
-              class="mt-3 inline-grid grid-cols-2 gap-1 rounded-lg bg-gray-100 p-1"
-              role="radiogroup"
-              aria-label="Periodo de recomendaciones"
-            >
-              @for (mode of filterModes; track mode.value) {
-                <button
-                  type="button"
-                  role="radio"
-                  [attr.aria-checked]="filterMode() === mode.value"
-                  (click)="setFilterMode(mode.value)"
-                  [class]="
-                    filterMode() === mode.value
-                      ? 'min-h-10 rounded-md bg-white px-4 py-2 text-sm font-semibold text-primary-700 shadow-sm transition cursor-pointer'
-                      : 'min-h-10 rounded-md px-4 py-2 text-sm font-semibold text-gray-500 transition hover:text-gray-800 cursor-pointer'
-                  "
-                >
-                  {{ mode.label }}
-                </button>
-              }
-            </div>
-          </div>
-
-          <div class="grid w-full gap-3 sm:grid-cols-2 lg:max-w-xl">
-            @if (filterMode() === 'daily') {
-              <label class="block sm:col-span-2">
-                <span class="text-sm font-semibold text-gray-700">Fecha</span>
-                <input
-                  type="date"
-                  [value]="selectedDate()"
-                  (change)="updateSelectedDate($event)"
-                  class="mt-2 min-h-11 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 outline-none transition focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
-                />
-              </label>
-            }
-
-            @if (filterMode() === 'range') {
-              <label class="block">
-                <span class="text-sm font-semibold text-gray-700">Desde</span>
-                <input
-                  type="date"
-                  [value]="rangeStartDate()"
-                  (change)="updateRangeStartDate($event)"
-                  class="mt-2 min-h-11 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 outline-none transition focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
-                />
-              </label>
-
-              <label class="block">
-                <span class="text-sm font-semibold text-gray-700">Hasta</span>
-                <input
-                  type="date"
-                  [value]="rangeEndDate()"
-                  (change)="updateRangeEndDate($event)"
-                  class="mt-2 min-h-11 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 outline-none transition focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
-                />
-              </label>
-            }
-          </div>
-        </div>
-
-        @if (rangeError()) {
-          <p
-            class="mt-4 rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
-          >
-            {{ rangeError() }}
-          </p>
-        }
-      </div>
-
-      <aside class="rounded-lg border border-primary-100 bg-primary-50 p-5 shadow-sm">
-        <p class="text-xs font-bold uppercase text-primary-600">Filtro activo</p>
-        <p class="mt-2 text-lg font-bold capitalize text-gray-950">{{ filterLabel() }}</p>
-        <p class="mt-3 text-sm text-gray-600">
-          {{
-            filterMode() === 'daily'
-              ? 'Vista puntual del día seleccionado.'
-              : 'Lectura acumulada del rango seleccionado.'
-          }}
-        </p>
-      </aside>
-    </section>
-
-    @if (recommendationsError()) {
-      <div
-        class="rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
-      >
-        {{ recommendationsError() }}
-      </div>
-    }
-
-    @if (recommendationsSummary()) {
-      <section class="rounded-lg border border-primary-100 bg-white p-5 shadow-sm sm:p-6">
-        <p class="text-sm font-semibold text-primary-600">Resumen del análisis</p>
-        <p class="mt-2 text-lg font-bold leading-snug text-gray-950">
-          {{ recommendationsSummary() }}
-        </p>
-      </section>
-    }
+    </div>
 
     @if (selectedView() === 'recommendations') {
-      <section class="rounded-lg border border-gray-200 bg-white shadow-sm">
-        <div
-          class="flex flex-col gap-3 border-b border-gray-100 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6"
-        >
-          <div>
-            <p class="text-sm font-semibold text-gray-500">Acciones sugeridas</p>
-            <h2 class="mt-1 text-xl font-bold text-gray-950">Recomendaciones para el periodo</h2>
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+        @for (recommendation of visibleRecommendations(); track recommendation.title) {
+          <div class="rounded-xl bg-white p-5 shadow-md">
+            <p class="text-sm font-semibold text-primary-600">
+              {{ recommendation.category || 'Recomendación' }}
+            </p>
+            <h2 class="mt-2 text-lg font-bold text-gray-800">{{ recommendation.title }}</h2>
+            <p class="mt-2 text-sm text-gray-500">
+              {{ recommendation.description }}
+            </p>
           </div>
-          <span
-            class="inline-flex w-fit items-center rounded-full bg-secondary-50 px-3 py-1 text-sm font-semibold text-secondary-800"
-          >
-            {{ visibleRecommendations().length }} sugerencias
-          </span>
-        </div>
-
-        <div class="grid grid-cols-1 gap-4 p-5 sm:p-6 lg:grid-cols-3">
-          @for (
-            recommendation of visibleRecommendations();
-            track recommendation.title;
-            let index = $index
-          ) {
-            <article
-              class="flex min-h-52 flex-col rounded-lg border border-gray-200 bg-white p-5 transition hover:border-primary-200 hover:bg-gray-50"
-            >
-              <div class="mb-4 flex items-start justify-between gap-3">
-                <span
-                  [class]="
-                    'inline-flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold ' +
-                    getRecommendationTone(index)
-                  "
-                >
-                  {{ index + 1 }}
-                </span>
-                <span
-                  class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600"
-                >
-                  {{ recommendation.category || 'Recomendación' }}
-                </span>
-              </div>
-
-              <h3 class="text-lg font-bold leading-snug text-gray-950">
-                {{ recommendation.title }}
-              </h3>
-              <p class="mt-3 flex-1 text-sm leading-6 text-gray-600">
-                {{ recommendation.description }}
-              </p>
-            </article>
-          }
-        </div>
-      </section>
+        }
+      </div>
     } @else {
       @let currentComparison = comparison();
 
-      <section class="rounded-lg border border-gray-200 bg-white shadow-sm">
-        <div class="border-b border-gray-100 p-5 sm:p-6">
-          <p class="text-sm font-semibold text-gray-500">Evolución</p>
-          <h2 class="mt-1 text-xl font-bold text-gray-950">Comparación del periodo</h2>
-        </div>
-
-        <div class="space-y-5 p-5 sm:p-6">
-          @if (currentComparison) {
-            <div
+      @if (currentComparison) {
+        <section class="space-y-4">
+          <div
+            [class]="
+              currentComparison.available
+                ? 'rounded-lg border border-primary-100 bg-primary-50 px-4 py-3'
+                : 'rounded-lg border border-yellow-100 bg-yellow-50 px-4 py-3'
+            "
+          >
+            <p
               [class]="
                 currentComparison.available
-                  ? 'rounded-lg border border-primary-100 bg-primary-50 p-5'
-                  : 'rounded-lg border border-yellow-100 bg-yellow-50 p-5'
+                  ? 'text-xs font-bold uppercase text-primary-600'
+                  : 'text-xs font-bold uppercase text-yellow-700'
               "
             >
-              <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              {{ currentComparison.available ? 'Comparación disponible' : 'Comparación limitada' }}
+            </p>
+            <p class="mt-1 text-sm font-semibold text-gray-700">
+              {{ currentComparison.summary || 'No se recibió un resumen de comparación.' }}
+            </p>
+          </div>
+
+          @if (hasComparisonDetails()) {
+            @for (group of comparisonGroups(); track group.title) {
+              @if (group.items.length) {
                 <div>
-                  <p
-                    [class]="
-                      currentComparison.available
-                        ? 'text-xs font-bold uppercase text-primary-600'
-                        : 'text-xs font-bold uppercase text-yellow-700'
-                    "
-                  >
-                    {{
-                      currentComparison.available
-                        ? 'Comparación disponible'
-                        : 'Comparación limitada'
-                    }}
-                  </p>
-                  <p class="mt-2 text-base font-semibold leading-6 text-gray-800">
-                    {{ currentComparison.summary || 'No se recibió un resumen de comparación.' }}
-                  </p>
-                </div>
-                <span
-                  [class]="
-                    currentComparison.available
-                      ? 'inline-flex w-fit rounded-full bg-white px-3 py-1 text-xs font-semibold text-primary-700 shadow-sm'
-                      : 'inline-flex w-fit rounded-full bg-white px-3 py-1 text-xs font-semibold text-yellow-700 shadow-sm'
-                  "
-                >
-                  {{ currentComparison.available ? 'Lista' : 'Parcial' }}
-                </span>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 xl:grid-cols-3">
-              @for (group of comparisonGroups(); track group.title; let groupIndex = $index) {
-                <section class="rounded-lg border border-gray-200 bg-white">
-                  <div class="border-b border-gray-100 p-4">
-                    <div class="flex items-center justify-between gap-3">
-                      <h3 class="text-sm font-bold uppercase text-gray-500">{{ group.title }}</h3>
-                      <span
-                        [class]="
-                          'rounded-full px-2.5 py-1 text-xs font-semibold ' +
-                          getComparisonTone(groupIndex)
-                        "
-                      >
-                        {{ group.items.length }}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div class="space-y-3 p-4">
-                    @if (group.items.length) {
-                      @for (item of group.items; track item.title) {
-                        <article class="rounded-lg border border-gray-100 bg-gray-50 p-4">
-                          <p class="text-xs font-semibold text-primary-600">
-                            {{ item.category || group.title }}
-                          </p>
-                          <h4 class="mt-2 text-base font-bold text-gray-950">{{ item.title }}</h4>
-                          <p class="mt-2 text-sm leading-6 text-gray-600">{{ item.description }}</p>
-                        </article>
-                      }
-                    } @else {
-                      <div
-                        class="rounded-lg border border-dashed border-gray-200 bg-gray-50 px-4 py-8 text-center"
-                      >
-                        <p class="text-sm font-medium text-gray-500">{{ group.emptyMessage }}</p>
+                  <h2 class="mb-3 text-sm font-bold uppercase text-gray-500">{{ group.title }}</h2>
+                  <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    @for (item of group.items; track item.title) {
+                      <div class="rounded-xl bg-white p-5 shadow-md">
+                        <p class="text-sm font-semibold text-primary-600">
+                          {{ item.category || group.title }}
+                        </p>
+                        <h3 class="mt-2 text-lg font-bold text-gray-800">{{ item.title }}</h3>
+                        <p class="mt-2 text-sm text-gray-500">{{ item.description }}</p>
                       </div>
                     }
                   </div>
-                </section>
+                </div>
               }
-            </div>
+            }
           } @else {
-            <div
-              class="flex min-h-60 flex-col items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 px-4 py-12 text-center"
-            >
-              <p class="text-lg font-bold text-gray-950">Aún no hay comparación disponible</p>
-              <p class="mt-2 max-w-md text-sm text-gray-600">
-                Cambia el rango o espera a tener más registros para generar patrones comparables.
-              </p>
+            <div class="rounded-lg border border-gray-100 bg-white px-4 py-3 text-sm font-medium text-gray-500 shadow-sm">
+              No se recibieron mejoras, alertas o patrones adicionales para comparar.
             </div>
           }
+        </section>
+      } @else {
+        <div class="rounded-lg border border-gray-100 bg-white px-4 py-3 text-sm font-medium text-gray-500 shadow-sm">
+          Aún no hay información de comparación para este periodo.
         </div>
-      </section>
+      }
     }
   </div>
 </div>
 
 @if (isLoadingRecommendations()) {
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 p-4 backdrop-blur-sm"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
     role="dialog"
     aria-modal="true"
     aria-labelledby="recommendations-loading-title"
   >
-    <div class="w-full max-w-sm rounded-lg bg-white px-6 py-7 text-center shadow-2xl">
+    <div class="w-full max-w-sm rounded-2xl bg-white px-6 py-7 text-center shadow-xl">
       <div
         class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-50"
       >
         <app-loading-spinner size="h-8 w-8" tone="text-primary-600" />
       </div>
-      <h2 id="recommendations-loading-title" class="text-lg font-semibold text-gray-950">
+      <h2 id="recommendations-loading-title" class="text-lg font-semibold text-gray-900">
         Cargando recomendaciones
       </h2>
       <p class="mt-2 text-sm text-gray-500">Estamos analizando el periodo seleccionado.</p>
