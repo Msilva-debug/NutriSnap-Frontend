@@ -29,8 +29,8 @@ export class Login implements OnInit {
     private route: ActivatedRoute,
   ) {
     this.form = this.fb.group({
-      email: ['mateocelis1550@gmail.com', [Validators.required, Validators.email]],
-      password: ['Mateosilva01', [Validators.required, Validators.minLength(6)]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
   ngOnInit(): void {

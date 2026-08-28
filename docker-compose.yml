@@ -1,8 +1,10 @@
 services:
   frontend:
     build:
-      context: ./frontend
+      context: .
       dockerfile: Dockerfile
+    env_file:
+      - .env
     ports:
       - "4200:80"
     restart: unless-stopped

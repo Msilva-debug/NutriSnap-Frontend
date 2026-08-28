@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { FoodAnalysisResult } from '../../../../models/meal.model';
 import { AuthService } from '../../../../services/auth.service';
-import { environment } from '../../../../../environments/environment';
+import { RuntimeConfigService } from '../../../../services/runtime-config.service';
 
 export interface ActivityLevel {
   id: number;
@@ -20,11 +20,10 @@ export interface MealDescriptionAnalysisRequest {
   providedIn: 'root',
 })
 export class NutritionAnalysisService {
-  private readonly BACKEND_URL = environment.urlBackend.replace(/\/$/, '');
-
   constructor(
     private http: HttpClient,
     private authService: AuthService,
+    private runtimeConfig: RuntimeConfigService,
   ) {}
 
   analyzeImage(image: File, description?: string): Observable<FoodAnalysisResult> {
@@ -35,14 +34,14 @@ export class NutritionAnalysisService {
       formData.append('description', description.trim());
     }
 
-    return this.http.post<FoodAnalysisResult>(`${this.BACKEND_URL}/meal/analyze-image`, formData, {
+    return this.http.post<FoodAnalysisResult>(this.runtimeConfig.apiUrl('/meal/analyze-image'), formData, {
       headers: this.getAuthHeaders(),
     });
   }
 
   analyzeDescription(request: MealDescriptionAnalysisRequest): Observable<FoodAnalysisResult> {
     return this.http.post<FoodAnalysisResult>(
-      `${this.BACKEND_URL}/meal/analyze-description`,
+      this.runtimeConfig.apiUrl('/meal/analyze-description'),
       request,
       {
         headers: this.getAuthHeaders(),
@@ -51,7 +50,7 @@ export class NutritionAnalysisService {
   }
 
   getActivityLevels(): Observable<ActivityLevel[]> {
-    return this.http.get<ActivityLevel[]>(`${this.BACKEND_URL}/activity-levels`);
+    return this.http.get<ActivityLevel[]>(this.runtimeConfig.apiUrl('/activity-levels'));
   }
 
   private getAuthHeaders(): { Authorization: string } | undefined {

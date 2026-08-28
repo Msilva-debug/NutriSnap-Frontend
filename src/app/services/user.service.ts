@@ -2,9 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
 import { AppTheme, normalizeTheme } from './theme.service';
 import { AuthService } from './auth.service';
+import { RuntimeConfigService } from './runtime-config.service';
 
 export interface CreateUserRequest {
   email: string;
@@ -46,20 +46,19 @@ type UpdateThemeResponse = Partial<AppTheme> & {
   providedIn: 'root',
 })
 export class UserService {
-  private readonly usersUrl = `${environment.urlBackend.replace(/\/$/, '')}/users`;
-
   constructor(
     private http: HttpClient,
     private authService: AuthService,
+    private runtimeConfig: RuntimeConfigService,
   ) {}
 
   createUser(createUserDto: CreateUserRequest): Observable<unknown> {
-    return this.http.post(this.usersUrl, createUserDto);
+    return this.http.post(this.runtimeConfig.apiUrl('/users'), createUserDto);
   }
 
   emailExists(email: string): Observable<EmailExistsResult> {
     return this.http
-      .get<EmailExistsResponse>(`${this.usersUrl}/exists-email`, {
+      .get<EmailExistsResponse>(this.runtimeConfig.apiUrl('/users/exists-email'), {
         params: { email },
       })
       .pipe(map((response) => this.parseEmailExistsResponse(response)));
@@ -67,7 +66,7 @@ export class UserService {
 
   updateTheme(theme: AppTheme): Observable<AppTheme> {
     return this.http
-      .patch<UpdateThemeResponse>(`${this.usersUrl}/theme-colors`, theme, {
+      .patch<UpdateThemeResponse>(this.runtimeConfig.apiUrl('/users/theme-colors'), theme, {
         headers: this.getAuthHeaders(),
       })
       .pipe(map((response) => this.parseUpdateThemeResponse(response, theme)));

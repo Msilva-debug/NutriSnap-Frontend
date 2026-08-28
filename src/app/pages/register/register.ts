@@ -72,18 +72,18 @@ export class Register implements OnInit {
   ) {
     this.form = this.fb.group({
       email: [
-        'mateocelis1550@gmail.com',
+        '',
         {
           validators: [Validators.required, Validators.email],
           asyncValidators: [this.emailAvailabilityValidator()],
         },
       ],
-      password: ['Mateosilva01', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['Mateosilva01', Validators.required],
-      name: ['Mateo', Validators.required],
-      birthdate: ['01/06/2004', Validators.required],
-      age: ['24', [Validators.required, Validators.min(1), Validators.max(120)]],
-      weight: [70, [Validators.required, Validators.min(20), Validators.max(300)]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', Validators.required],
+      name: ['', Validators.required],
+      birthdate: ['', Validators.required],
+      age: ['', [Validators.required, Validators.min(1), Validators.max(120)]],
+      weight: [0, [Validators.required, Validators.min(20), Validators.max(300)]],
       height: ['1.70', [Validators.required, Validators.min(50), Validators.max(250)]],
       sex: ['', Validators.required],
       activityLevel: ['', Validators.required],

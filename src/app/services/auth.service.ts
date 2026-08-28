@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject, tap } from 'rxjs';
-import { environment } from '../../environments/environment';
 import { AppStore } from '../store/app.store';
+import { RuntimeConfigService } from './runtime-config.service';
 import { ThemeService } from './theme.service';
 
 export interface LoginRequest {
@@ -24,7 +24,6 @@ export interface LoginResponse {
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly authUrl = `${environment.urlBackend.replace(/\/$/, '')}/auth`;
   private readonly tokenKey = 'access_token';
   private readonly userKey = 'auth_user';
   private readonly logoutSubject = new Subject<void>();
@@ -33,11 +32,12 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private appStore: AppStore,
+    private runtimeConfig: RuntimeConfigService,
     private themeService: ThemeService,
   ) {}
 
   login(loginDto: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.authUrl}/login`, loginDto).pipe(
+    return this.http.post<LoginResponse>(this.runtimeConfig.apiUrl('/auth/login'), loginDto).pipe(
       tap((response) => {
         localStorage.setItem(this.tokenKey, response.access_token);
         this.applyThemeFromLoginResponse(response);

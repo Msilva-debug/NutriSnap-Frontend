@@ -1,8 +1,8 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
+import { RuntimeConfigService } from './runtime-config.service';
 
 export type RecommendationPeriod = 'daily' | 'range';
 
@@ -50,15 +50,14 @@ export interface RecommendationsResponse {
   providedIn: 'root',
 })
 export class RecommendationsService {
-  readonly recommendationsUrl = `${environment.urlBackend.replace(/\/$/, '')}/recommendations`;
-
   constructor(
     private http: HttpClient,
     private authService: AuthService,
+    private runtimeConfig: RuntimeConfigService,
   ) {}
 
   findByFilter(filter: RecommendationFilter): Observable<RecommendationsResponse> {
-    return this.http.get<RecommendationsResponse>(this.recommendationsUrl, {
+    return this.http.get<RecommendationsResponse>(this.runtimeConfig.apiUrl('/recommendations'), {
       params: this.buildParams(filter),
       headers: this.getAuthHeaders(),
     });
